@@ -1,285 +1,181 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Leads - Oásis Car Estética</title>
-    <!-- Tailwind CSS para estilização moderna -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS Client -->
+    <title>Painel Administrativo | Oásis Car Estética</title>
+    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0a0a0a',
+                            card: '#141414',
+                            border: '#262626',
+                            accent: '#f59e0b', // Amarelo/Laranja do painel
+                            red: '#dc2626',
+                            grayText: '#a3a3a3'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; color: #ffffff; }
+    </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen p-4 md:p-8">
+<body class="bg-[#0a0a0a] text-white antialiased min-h-screen p-4 sm:p-8">
 
     <div class="max-w-7xl mx-auto space-y-6">
-        <!-- Cabeçalho -->
-        <header class="flex flex-col md:flex-row justify-between items-center bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-xl gap-4">
+        
+        <!-- HEADER DO PAINEL -->
+        <header class="bg-[#141414] border border-[#262626] rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
             <div>
-                <h1 class="text-2xl font-bold tracking-wide text-amber-500">Oásis Car Estética</h1>
-                <p class="text-sm text-gray-400">Painel de Gestão de Leads e Orçamentos - Ribeirão Preto</p>
+                <h1 class="text-2xl font-extrabold tracking-tight text-amber-500">Oásis Car Estética</h1>
+                <p class="text-xs text-brand-grayText mt-1">Painel de Gestão de Leads e Orçamentos - Ribeirão Preto</p>
             </div>
             <div class="flex items-center gap-3">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-950 text-green-400 border border-green-800">
-                    <span class="w-2 h-2 mr-2 bg-green-500 rounded-full animate-pulse"></span> Sistema Online
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-800/60 text-emerald-400 text-xs font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistema Online
                 </span>
+                <button onclick="carregarLeads()" class="bg-[#262626] hover:bg-neutral-800 text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-rotate"></i> Atualizar
+                </button>
             </div>
         </header>
 
-        <!-- Grade Principal -->
+        <!-- CONTEÚDO PRINCIPAL -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- Tabela de Leads (Ocupa 2 colunas) -->
-            <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl overflow-hidden flex flex-col">
-                <h2 class="text-lg font-semibold mb-4 text-gray-200">Leads Recentes</h2>
-                
+            <!-- TABELA DE LEADS RECENTES (Ocupa 2 colunas) -->
+            <div class="lg:col-span-2 bg-[#141414] border border-[#262626] rounded-2xl p-6 shadow-xl flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg font-bold">Leads Recentes</h2>
+                    <span id="contadorLeads" class="text-xs bg-[#262626] px-2.5 py-1 rounded-full text-brand-grayText">0 leads</span>
+                </div>
+
                 <div class="overflow-x-auto flex-1">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="border-b border-gray-800 text-xs text-gray-400 uppercase tracking-wider">
-                                <th class="py-3 px-4">Cliente</th>
-                                <th class="py-3 px-4">Veículo</th>
-                                <th class="py-3 px-4">Serviço</th>
-                                <th class="py-3 px-4">Status</th>
-                                <th class="py-3 px-4 text-right">Ações</th>
+                            <tr class="border-b border-[#262626] text-xs text-brand-grayText uppercase tracking-wider">
+                                <th class="pb-3 font-semibold">Cliente</th>
+                                <th class="pb-3 font-semibold">Veículo</th>
+                                <th class="pb-3 font-semibold">Serviço</th>
+                                <th class="pb-3 font-semibold">Status</th>
+                                <th class="pb-3 font-semibold text-right">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="tabela-leads-corpo" class="divide-y divide-gray-800/60 text-sm">
-                            <!-- Os dados serão injetados dinamicamente via JS -->
+                        <tbody id="tabelaLeads" class="divide-y divide-[#262626]/50 text-sm">
                             <tr>
-                                <td colspan="5" class="py-8 text-center text-gray-500">Carregando leads...</td>
+                                <td colspan="5" class="py-8 text-center text-brand-grayText">Carregando leads...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Painel Lateral: Calculadora Rápida -->
-            <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+            <!-- CALCULADORA DE ORÇAMENTO -->
+            <div class="bg-[#141414] border border-[#262626] rounded-2xl p-6 shadow-xl space-y-4">
+                <h2 class="text-lg font-bold mb-4">Calculadora de Orçamento</h2>
+                
                 <div>
-                    <h2 class="text-lg font-semibold mb-4 text-gray-200">Calculadora de Orçamento</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Valor do Serviço (R$)</label>
-                            <input type="number" id="calc-servico" oninput="calcularOrcamento()" placeholder="0,00" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-gray-100 focus:outline-none focus:border-amber-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Desconto (R$)</label>
-                            <input type="number" id="calc-desconto" oninput="calcularOrcamento()" placeholder="0,00" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-gray-100 focus:outline-none focus:border-amber-500">
-                        </div>
-                        <div class="pt-4 border-t border-gray-800">
-                            <span class="block text-xs font-medium text-gray-400 mb-1">Valor Final Sugerido</span>
-                            <div id="orcamento-resultado" class="text-2xl font-bold text-amber-400">R$ 0,00</div>
-                        </div>
-                    </div>
+                    <label class="block text-xs text-brand-grayText mb-1">Valor do Serviço (R$)</label>
+                    <input type="number" id="valServico" placeholder="0,00" oninput="calcularOrcamento()"
+                        class="w-full bg-[#1c1c1c] border border-[#262626] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
+                </div>
+
+                <div>
+                    <label class="block text-xs text-brand-grayText mb-1">Desconto (R$)</label>
+                    <input type="number" id="valDesconto" placeholder="0,00" oninput="calcularOrcamento()"
+                        class="w-full bg-[#1c1c1c] border border-[#262626] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
+                </div>
+
+                <div class="pt-4 border-t border-[#262626]">
+                    <span class="block text-xs text-brand-grayText mb-1">Valor Final Sugerido</span>
+                    <div id="valorFinal" class="text-3xl font-extrabold text-amber-500">R$ 0,00</div>
                 </div>
             </div>
 
         </div>
+
     </div>
 
-    <!-- Modal de Detalhes do Lead -->
-    <div id="modal-lead" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-6">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h3 id="modal-cliente-nome" class="text-xl font-bold text-gray-100">Nome do Cliente</h3>
-                    <p id="modal-cliente-data" class="text-xs text-gray-400 mt-0.5">Recebido em --</p>
-                </div>
-                <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-100 text-lg font-bold px-2 py-1">&times;</button>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 bg-gray-950 p-4 rounded-xl border border-gray-800/60">
-                <div>
-                    <span class="block text-xs text-gray-400">Veículo</span>
-                    <span id="modal-cliente-veiculo" class="font-medium text-gray-200">--</span>
-                </div>
-                <div>
-                    <span class="block text-xs text-gray-400">Serviço Solicitado</span>
-                    <span id="modal-cliente-servico" class="font-medium text-amber-400">--</span>
-                </div>
-            </div>
-
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Status do Lead</label>
-                    <select id="modal-cliente-status" onchange="atualizarStatusLead()" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-gray-100 focus:outline-none focus:border-amber-500">
-                        <option value="NOVO">NOVO</option>
-                        <option value="EM_CONTATO">EM CONTATO</option>
-                        <option value="AGENDADO">AGENDADO</option>
-                        <option value="CONCLUIDO">CONCLUÍDO</option>
-                        <option value="PERDIDO">PERDIDO</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Valor Aprovado (R$)</label>
-                    <div class="flex gap-2">
-                        <input type="number" id="modal-cliente-valor" placeholder="0.00" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-gray-100 focus:outline-none focus:border-amber-500">
-                        <button onclick="atualizarValorLead()" class="bg-amber-600 hover:bg-amber-500 text-gray-950 font-semibold px-4 py-2.5 rounded-xl transition-colors">Salvar</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pt-4 border-t border-gray-800 flex justify-end gap-3">
-                <button onclick="fecharModal()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors">Fechar</button>
-                <a id="btn-whatsapp-direto" href="#" target="_blank" class="bg-green-600 hover:bg-green-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 transition-colors">
-                    Chamar no WhatsApp
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts da Aplicação -->
+    <!-- SCRIPT DE INTEGRAÇÃO COM SUPABASE -->
     <script>
-       // Substitua este bloco no seu arquivo HTML do Painel
-const SUPABASE_URL = 'https://pyodkkcmuoqsrsnnifdqf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5b2Rra2NtdW9xcnNubmlmZHFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzMjY2MzEsImV4cCI6MjEwMTkwMjYzMX0.QSfkfTNraM9GAgzdFJ8fzXYcaj6MrzqlHodLzsJcIoA';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_URL = 'https://pyodkkcmuoqsrsnnifdqf.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5b2Rra2NtdW9xcnNubmlmZHFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzMjY2MzEsImV4cCI6MjEwMTkwMjYzMX0.QSfkfTNraM9GAgzdFJ8fzXYcaj6MrzqlHodLzsJcIoA';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let leadAtualId = null;
-        let leadsCache = [];
+        async function carregarLeads() {
+            const tbody = document.getElementById('tabelaLeads');
+            tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-brand-grayText">Buscando leads...</td></tr>`;
 
-        // Função de Alerta Sonoro para novos leads
-        function testAudioAlert() {
             try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.value = 587.33; // Dó
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.3);
-            } catch (e) {
-                console.log("Áudio bloqueado pelo navegador até haver interação.");
+                const { data, error } = await supabaseClient
+                    .from('pistas')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-brand-grayText">Nenhum orçamento solicitado ainda.</td></tr>`;
+                    document.getElementById('contadorLeads').innerText = '0 leads';
+                    return;
+                }
+
+                document.getElementById('contadorLeads').innerText = `${data.length} lead${data.length > 1 ? 's' : ''}`;
+                tbody.innerHTML = '';
+
+                data.forEach(lead => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-neutral-900/40 transition-colors';
+                    
+                    tr.innerHTML = `
+                        <td class="py-4 font-medium">${lead.nome || 'Não informado'}</td>
+                        <td class="py-4 text-brand-grayText">${lead.veiculo || '-'}</td>
+                        <td class="py-4 text-amber-400 font-medium">${lead.servico || '-'}</td>
+                        <td class="py-4">
+                            <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                ${lead.status || 'NOVO'}
+                            </span>
+                        </td>
+                        <td class="py-4 text-right">
+                            <a href="https://wa.me/5516991408438?text=${encodeURIComponent('Olá ' + lead.nome + ', vi seu pedido de orçamento para o serviço de ' + lead.servico + ' (' + lead.veiculo + '). Podemos conversar?')}" 
+                               target="_blank" 
+                               class="bg-emerald-600 hover:bg-emerald-500 text-white p-2 rounded-lg text-xs inline-flex items-center gap-1 transition-colors">
+                               <i class="fa-brands fa-whatsapp"></i> Chamar
+                            </a>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (err) {
+                console.error("Erro ao carregar leads:", err);
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-red-500">Erro ao carregar dados do painel.</td></tr>`;
             }
         }
 
-        // Carregar dados dos Leads do Supabase
-        async function carregarDados() {
-            const { data, error } = await supabaseClient
-                .from('leads')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                console.error("Erro ao carregar leads:", error);
-                return;
-            }
-
-            leadsCache = data || [];
-            renderizarTabela();
-        }
-
-        // Renderizar a tabela na tela
-        function renderizarTabela() {
-            const tbody = document.getElementById('tabela-leads-corpo');
-            if (leadsCache.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-500">Nenhum lead encontrado.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = leadsCache.map(lead => `
-                <tr class="hover:bg-gray-800/40 transition-colors">
-                    <td class="py-3 px-4 font-medium text-gray-200">${lead.name || 'Sem Nome'}</td>
-                    <td class="py-3 px-4 text-gray-300">${lead.vehicle || '--'}</td>
-                    <td class="py-3 px-4 text-amber-400">${lead.service || '--'}</td>
-                    <td class="py-3 px-4">
-                        <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold 
-                            ${lead.status === 'NOVO' ? 'bg-blue-950 text-blue-400 border border-blue-800' : 
-                              lead.status === 'AGENDADO' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 
-                              'bg-gray-800 text-gray-300'}">
-                            ${lead.status || 'NOVO'}
-                        </span>
-                    </td>
-                    <td class="py-3 px-4 text-right">
-                        <button onclick="verDetalhes('${lead.id}')" class="bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
-                            Gerenciar
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // Abrir Modal de Detalhes
-        function verDetalhes(id) {
-            const lead = leadsCache.find(l => l.id === id);
-            if (!lead) return;
-
-            leadAtualId = lead.id;
-            document.getElementById('modal-cliente-nome').innerText = lead.name || 'Cliente';
-            document.getElementById('modal-cliente-veiculo').innerText = lead.vehicle || '--';
-            document.getElementById('modal-cliente-servico').innerText = lead.service || '--';
-            document.getElementById('modal-cliente-status').value = lead.status || 'NOVO';
-            document.getElementById('modal-cliente-valor').value = lead.approved_value || lead.estimated_value || '';
-            document.getElementById('modal-cliente-data').innerText = `Recebido em ${lead.created_at ? new Date(lead.created_at).toLocaleString('pt-BR') : '--'}`;
-
-            const phoneClean = (lead.phone || '').replace(/\D/g, '');
-            const mensagem = encodeURIComponent(`Olá ${lead.name || 'Cliente'}, tudo bem? Aqui é da Oásis Car Estética em Ribeirão Preto. Vi sua solicitação para o veículo ${lead.vehicle || 'seu carro'} referente ao serviço de ${lead.service}. Como podemos ajudar?`);
-            document.getElementById('btn-whatsapp-direto').href = `https://wa.me/55${phoneClean}?text=${mensagem}`;
-
-            document.getElementById('modal-lead').classList.remove('hidden');
-        }
-
-        // Fechar Modal
-        function fecharModal() {
-            document.getElementById('modal-lead').classList.add('hidden');
-            leadAtualId = null;
-        }
-
-        // Atualizar Status do Lead no Supabase
-        async function atualizarStatusLead() {
-            if (!leadAtualId) return;
-            const novoStatus = document.getElementById('modal-cliente-status').value;
-            const { error } = await supabaseClient
-                .from('leads')
-                .update({ status: novoStatus })
-                .eq('id', leadAtualId);
-
-            if (error) {
-                console.error("Erro ao atualizar status:", error);
-                return;
-            }
-            carregarDados();
-        }
-
-        // Atualizar Valor Aprovado do Lead no Supabase
-        async function atualizarValorLead() {
-            if (!leadAtualId) return;
-            const novoValor = parseFloat(document.getElementById('modal-cliente-valor').value) || 0;
-            const { error } = await supabaseClient
-                .from('leads')
-                .update({ approved_value: novoValor })
-                .eq('id', leadAtualId);
-
-            if (error) {
-                console.error("Erro ao atualizar valor:", error);
-                return;
-            }
-            carregarDados();
-        }
-
-        // Calculadora de Orçamento
         function calcularOrcamento() {
-            const servico = parseFloat(document.getElementById('calc-servico').value) || 0;
-            const desconto = parseFloat(document.getElementById('calc-desconto').value) || 0;
+            const servico = parseFloat(document.getElementById('valServico').value) || 0;
+            const desconto = parseFloat(document.getElementById('valDesconto').value) || 0;
             const total = Math.max(0, servico - desconto);
-            document.getElementById('orcamento-resultado').innerText = `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            
+            document.getElementById('valorFinal').innerText = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // Inicialização da Aplicação
-        carregarDados();
-
-        // Listener Realtime do Supabase para novos leads com alerta sonoro
-        supabaseClient
-            .channel('public:leads')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, payload => {
-                testAudioAlert();
-                carregarDados();
-            })
-            .subscribe();
+        // Carrega automaticamente ao abrir a página
+        carregarLeads();
     </script>
 </body>
 </html>
