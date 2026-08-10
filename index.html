@@ -17,7 +17,7 @@
                             dark: '#0a0a0a',
                             card: '#141414',
                             border: '#262626',
-                            accent: '#f59e0b', // Amarelo/Laranja do painel
+                            accent: '#f59e0b',
                             red: '#dc2626',
                             grayText: '#a3a3a3'
                         }
@@ -47,7 +47,7 @@
                 <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-800/60 text-emerald-400 text-xs font-semibold">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistema Online
                 </span>
-                <button onclick="carregarLeads()" class="bg-[#262626] hover:bg-neutral-800 text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex items-center gap-2">
+                <button onclick="carregarLeads()" class="bg-[#262626] hover:bg-neutral-800 text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex items-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-rotate"></i> Atualizar
                 </button>
             </div>
@@ -111,70 +111,72 @@
 
     <!-- SCRIPT DE INTEGRAÇÃO COM SUPABASE -->
     <script>
+        // 1. Configuração do Supabase
         const SUPABASE_URL = 'https://pyodkkcmuoqsrsnnifdqf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5b2Rra2NtdW9xcnNubmlmZHFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzMjY2MzEsImV4cCI6MjEwMTkwMjYzMX0.QSfkfTNraM9GAgzdFJ8fzXYcaj6MrzqlHodLzsJcIoA';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5b2Rra2NtdW9xcnNubmlmZHFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzMjY2MzEsImV4cCI6MjEwMTkwMjYzMX0.QSfkfTNraM9GAgzdFJ8fzXYcaj6MrzqlHodLzsJcIoA';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // 2. Função que busca os dados no Supabase e preenche a tabela
         async function carregarLeads() {
-            const tbody = document.getElementById('tabelaLeads');
-            tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-brand-grayText">Buscando leads...</td></tr>`;
+            const tabelaBody = document.getElementById('tabelaLeads');
+            const contadorLeads = document.getElementById('contadorLeads');
+            
+            tabelaBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-brand-grayText">Carregando dados...</td></tr>';
 
             try {
                 const { data, error } = await supabaseClient
-                    .from('pistas')
+                    .from('orcamentos')
                     .select('*')
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
 
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-brand-grayText">Nenhum orçamento solicitado ainda.</td></tr>`;
-                    document.getElementById('contadorLeads').innerText = '0 leads';
+                tabelaBody.innerHTML = '';
+                contadorLeads.innerText = `${data.length} lead${data.length === 1 ? '' : 's'}`;
+
+                if (data.length === 0) {
+                    tabelaBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-brand-grayText">Nenhum orçamento pendente.</td></tr>';
                     return;
                 }
 
-                document.getElementById('contadorLeads').innerText = `${data.length} lead${data.length > 1 ? 's' : ''}`;
-                tbody.innerHTML = '';
-
-                data.forEach(lead => {
-                    const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-neutral-900/40 transition-colors';
-                    
-                    tr.innerHTML = `
-                        <td class="py-4 font-medium">${lead.nome || 'Não informado'}</td>
-                        <td class="py-4 text-brand-grayText">${lead.veiculo || '-'}</td>
-                        <td class="py-4 text-amber-400 font-medium">${lead.servico || '-'}</td>
-                        <td class="py-4">
-                            <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                                ${lead.status || 'NOVO'}
-                            </span>
-                        </td>
-                        <td class="py-4 text-right">
-                            <a href="https://wa.me/5516991408438?text=${encodeURIComponent('Olá ' + lead.nome + ', vi seu pedido de orçamento para o serviço de ' + lead.servico + ' (' + lead.veiculo + '). Podemos conversar?')}" 
-                               target="_blank" 
-                               class="bg-emerald-600 hover:bg-emerald-500 text-white p-2 rounded-lg text-xs inline-flex items-center gap-1 transition-colors">
-                               <i class="fa-brands fa-whatsapp"></i> Chamar
-                            </a>
-                        </td>
+                data.forEach(item => {
+                    const row = `
+                        <tr class="hover:bg-[#1c1c1c]/50 transition-colors">
+                            <td class="py-3 font-medium">${item.nome || 'Não informado'}</td>
+                            <td class="py-3 text-brand-grayText">${item.veiculo || '-'}</td>
+                            <td class="py-3 text-brand-grayText">${item.servico || '-'}</td>
+                            <td class="py-3">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                    ${item.status || 'NOVO'}
+                                </span>
+                            </td>
+                            <td class="py-3 text-right">
+                                <button onclick="alert('Detalhes do lead: ${item.telefone || ''}')" class="bg-[#262626] hover:bg-neutral-800 text-xs px-3 py-1.5 rounded-lg transition-colors cursor-pointer">
+                                    Ver
+                                </button>
+                            </td>
+                        </tr>
                     `;
-                    tbody.appendChild(tr);
+                    tabelaBody.innerHTML += row;
                 });
-
             } catch (err) {
-                console.error("Erro ao carregar leads:", err);
-                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-red-500">Erro ao carregar dados do painel.</td></tr>`;
+                console.error('Erro:', err.message);
+                tabelaBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-red-500">Erro ao carregar dados do painel.</td></tr>';
+                contadorLeads.innerText = '0 leads';
             }
         }
 
+        // 3. Função da Calculadora de Orçamento
         function calcularOrcamento() {
             const servico = parseFloat(document.getElementById('valServico').value) || 0;
             const desconto = parseFloat(document.getElementById('valDesconto').value) || 0;
-            const total = Math.max(0, servico - desconto);
-            
-            document.getElementById('valorFinal').innerText = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            let final = servico - desconto;
+            if (final < 0) final = 0;
+
+            document.getElementById('valorFinal').innerText = 'R$ ' + final.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
-        // Carrega automaticamente ao abrir a página
+        // Carrega os leads automaticamente assim que a página abre
         carregarLeads();
     </script>
 </body>
