@@ -1,408 +1,163 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OÁSIS CAR | Central de Leads & CRM</title>
-    <!-- Tailwind CSS -->
+    <title>Painel de Leads - Oásis Car Estética</title>
+    <!-- Tailwind CSS para estilização moderna -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            red: '#DC2626',
-                            darkred: '#991B1B',
-                            dark: '#0A0A0A',
-                            card: '#121212',
-                            border: '#262626'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: #262626; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #DC2626; }
-    </style>
 </head>
-<body class="bg-brand-dark text-gray-100 min-h-screen flex flex-col lg:flex-row antialiased">
+<body class="bg-gray-950 text-gray-100 min-h-screen p-4 md:p-8">
 
-    <!-- SIDEBAR -->
-    <aside class="w-full lg:w-64 bg-brand-card border-r border-brand-border flex flex-col justify-between shrink-0">
-        <div>
-            <!-- Logo Header -->
-            <div class="p-6 border-b border-brand-border flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-brand-red flex items-center justify-center text-white font-black text-xl shadow-lg shadow-red-900/30">
-                    O
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg tracking-wider text-white">OÁSIS CAR</h1>
-                    <p class="text-xs text-brand-red font-semibold uppercase tracking-widest">Estética Automotiva</p>
-                </div>
-            </div>
-
-            <!-- Navegação -->
-            <nav class="p-4 space-y-1.5">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-brand-red text-white shadow-lg shadow-red-900/20">
-                    <i class="fa-solid fa-chart-pie w-5"></i>
-                    <span>Dashboard</span>
-                </button>
-                <button onclick="switchTab('leads')" id="nav-leads" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-gray-400 hover:text-white hover:bg-neutral-900">
-                    <i class="fa-solid fa-fire w-5"></i>
-                    <span>Central de Leads</span>
-                    <span id="badge-leads-count" class="ml-auto bg-brand-red/20 text-brand-red text-xs px-2 py-0.5 rounded-full font-bold">0</span>
-                </button>
-                <button onclick="switchTab('agenda')" id="nav-agenda" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-gray-400 hover:text-white hover:bg-neutral-900">
-                    <i class="fa-solid fa-calendar-days w-5"></i>
-                    <span>Agenda</span>
-                </button>
-                <button onclick="switchTab('orcamentos')" id="nav-orcamentos" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-gray-400 hover:text-white hover:bg-neutral-900">
-                    <i class="fa-solid fa-file-invoice-dollar w-5"></i>
-                    <span>Orçamentos</span>
-                </button>
-                <button onclick="switchTab('financeiro')" id="nav-financeiro" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-gray-400 hover:text-white hover:bg-neutral-900">
-                    <i class="fa-solid fa-wallet w-5"></i>
-                    <span>Financeiro</span>
-                </button>
-            </nav>
-        </div>
-
-        <!-- Status Rodapé Sidebar -->
-        <div class="p-4 border-t border-brand-border">
-            <div class="bg-neutral-900/80 p-3 rounded-xl border border-brand-border flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span class="text-xs font-medium text-gray-300">Live Realtime</span>
-                </div>
-                <button onclick="testAudioAlert()" class="text-xs text-gray-400 hover:text-white bg-neutral-800 px-2 py-1 rounded-lg" title="Testar Alerta Sonoro">
-                    <i class="fa-solid fa-volume-high"></i>
-                </button>
-            </div>
-        </div>
-    </aside>
-
-    <!-- CONTEÚDO PRINCIPAL -->
-    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        
-        <!-- Header Superior -->
-        <header class="bg-brand-card border-b border-brand-border px-6 py-4 flex items-center justify-between sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto space-y-6">
+        <!-- Cabeçalho -->
+        <header class="flex flex-col md:flex-row justify-between items-center bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-xl gap-4">
             <div>
-                <h2 id="page-title" class="text-xl font-bold text-white">Dashboard Operacional</h2>
-                <p class="text-xs text-gray-400">Ribeirão Preto - SP | Gestão Comercial em Tempo Real</p>
+                <h1 class="text-2xl font-bold tracking-wide text-amber-500">Oásis Car Estética</h1>
+                <p class="text-sm text-gray-400">Painel de Gestão de Leads e Orçamentos - Ribeirão Preto</p>
             </div>
-            <div class="flex items-center space-x-4">
-                <button onclick="carregarDados()" class="bg-neutral-900 hover:bg-neutral-800 border border-brand-border px-4 py-2 rounded-xl text-xs font-semibold text-gray-300 flex items-center space-x-2 transition-all">
-                    <i class="fa-solid fa-rotate-right"></i>
-                    <span>Atualizar Dados</span>
-                </button>
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-950 text-green-400 border border-green-800">
+                    <span class="w-2 h-2 mr-2 bg-green-500 rounded-full animate-pulse"></span> Sistema Online
+                </span>
             </div>
         </header>
 
-        <!-- CONTAINER DAS ABAS -->
-        <div class="p-6 flex-1">
-
-            <!-- ABA: DASHBOARD -->
-            <div id="tab-dashboard" class="space-y-6">
-                <!-- Cards de Indicadores -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-brand-card border border-brand-border p-5 rounded-2xl relative overflow-hidden">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs font-medium text-gray-400 uppercase">Novos Leads</p>
-                                <h3 id="stat-novos" class="text-3xl font-extrabold text-white mt-1">0</h3>
-                            </div>
-                            <div class="w-10 h-10 rounded-xl bg-brand-red/10 border border-brand-red/20 flex items-center justify-center text-brand-red">
-                                <i class="fa-solid fa-fire text-lg"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-brand-card border border-brand-border p-5 rounded-2xl relative overflow-hidden">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs font-medium text-gray-400 uppercase">Em Atendimento</p>
-                                <h3 id="stat-atendimento" class="text-3xl font-extrabold text-white mt-1">0</h3>
-                            </div>
-                            <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
-                                <i class="fa-solid fa-comments text-lg"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-brand-card border border-brand-border p-5 rounded-2xl relative overflow-hidden">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs font-medium text-gray-400 uppercase">Convertidos</p>
-                                <h3 id="stat-convertidos" class="text-3xl font-extrabold text-white mt-1">0</h3>
-                            </div>
-                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
-                                <i class="fa-solid fa-circle-check text-lg"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-brand-card border border-brand-border p-5 rounded-2xl relative overflow-hidden">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs font-medium text-gray-400 uppercase">Faturamento Fechado</p>
-                                <h3 id="stat-faturamento" class="text-2xl font-extrabold text-emerald-400 mt-1">R$ 0,00</h3>
-                            </div>
-                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
-                                <i class="fa-solid fa-dollar-sign text-lg"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tabela Rápida na Dashboard -->
-                <div class="bg-brand-card border border-brand-border rounded-2xl p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-white text-base">Últimas Solicitações Recebidas</h3>
-                        <button onclick="switchTab('leads')" class="text-xs text-brand-red font-semibold hover:underline">Ver todos os leads →</button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr class="border-b border-brand-border text-gray-400 text-xs uppercase tracking-wider">
-                                    <th class="py-3 px-4">Cliente</th>
-                                    <th class="py-3 px-4">Veículo</th>
-                                    <th class="py-3 px-4">Serviço</th>
-                                    <th class="py-3 px-4">Status</th>
-                                    <th class="py-3 px-4">Data/Hora</th>
-                                    <th class="py-3 px-4 text-right">Ação</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dashboard-leads-table" class="divide-y divide-brand-border text-gray-300">
-                                <tr><td colspan="6" class="py-6 text-center text-gray-500">Carregando leads...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+        <!-- Grade Principal -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Tabela de Leads (Ocupa 2 colunas) -->
+            <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl overflow-hidden flex flex-col">
+                <h2 class="text-lg font-semibold mb-4 text-gray-200">Leads Recentes</h2>
+                
+                <div class="overflow-x-auto flex-1">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-800 text-xs text-gray-400 uppercase tracking-wider">
+                                <th class="py-3 px-4">Cliente</th>
+                                <th class="py-3 px-4">Veículo</th>
+                                <th class="py-3 px-4">Serviço</th>
+                                <th class="py-3 px-4">Status</th>
+                                <th class="py-3 px-4 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-leads-corpo" class="divide-y divide-gray-800/60 text-sm">
+                            <!-- Os dados serão injetados dinamicamente via JS -->
+                            <tr>
+                                <td colspan="5" class="py-8 text-center text-gray-500">Carregando leads...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- ABA: LEADS (CENTRAL COMPLETA) -->
-            <div id="tab-leads" class="space-y-6 hidden">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-brand-card border border-brand-border p-4 rounded-2xl">
-                    <div class="relative flex-1 w-full sm:max-w-md">
-                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-500"></i>
-                        <input type="text" id="search-leads" onkeyup="filtrarLeads()" placeholder="Buscar por nome, telefone ou veículo..." class="w-full bg-neutral-900 border border-brand-border rounded-xl pl-11 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-red">
-                    </div>
-                    <div class="flex items-center space-x-3 w-full sm:w-auto">
-                        <select id="filter-status" onchange="filtrarLeads()" class="bg-neutral-900 border border-brand-border rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-red">
-                            <option value="">Todos os Status</option>
-                            <option value="NOVO">Novo</option>
-                            <option value="CONTATO REALIZADO">Contato Realizado</option>
-                            <option value="ORÇAMENTO ENVIADO">Orçamento Enviado</option>
-                            <option value="NEGOCIAÇÃO">Negociação</option>
-                            <option value="AGENDADO">Agendado</option>
-                            <option value="CONVERTIDO">Convertido</option>
-                            <option value="PERDIDO">Perdido</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="bg-brand-card border border-brand-border rounded-2xl overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr class="border-b border-brand-border text-gray-400 text-xs uppercase tracking-wider bg-neutral-900/50">
-                                    <th class="py-3.5 px-4">Cliente</th>
-                                    <th class="py-3.5 px-4">Contato</th>
-                                    <th class="py-3.5 px-4">Veículo</th>
-                                    <th class="py-3.5 px-4">Serviço</th>
-                                    <th class="py-3.5 px-4">Status</th>
-                                    <th class="py-3.5 px-4">Data/Hora</th>
-                                    <th class="py-3.5 px-4 text-right">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="full-leads-table" class="divide-y divide-brand-border text-gray-300">
-                                <tr><td colspan="7" class="py-8 text-center text-gray-500">Carregando base de leads...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ABA: AGENDA -->
-            <div id="tab-agenda" class="space-y-6 hidden">
-                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl">
-                    <h3 class="font-bold text-white text-lg mb-4"><i class="fa-solid fa-calendar-days text-brand-red mr-2"></i> Agendamentos de Serviços</h3>
-                    <div id="agenda-list" class="space-y-3">
-                        <p class="text-gray-500 text-sm">Nenhum agendamento registrado até o momento.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ABA: ORÇAMENTOS -->
-            <div id="tab-orcamentos" class="space-y-6 hidden">
-                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl">
-                    <h3 class="font-bold text-white text-lg mb-4"><i class="fa-solid fa-calculator text-brand-red mr-2"></i> Calculadora & Simulador de Orçamentos</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Serviço Principal</label>
-                                <select id="calc-servico" class="w-full bg-neutral-900 border border-brand-border rounded-xl px-4 py-2.5 text-sm text-white">
-                                    <option value="400">Polimento Técnico — R$ 400</option>
-                                    <option value="800">Vitrificação de Pintura — R$ 800</option>
-                                    <option value="250">Higienização Interna — R$ 250</option>
-                                    <option value="150">Restauração de Faróis — R$ 150</option>
-                                    <option value="1500">Proteção PPF (Parcial) — R$ 1.500</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Desconto Aplicado (R$)</label>
-                                <input type="number" id="calc-desconto" value="0" class="w-full bg-neutral-900 border border-brand-border rounded-xl px-4 py-2.5 text-sm text-white">
-                            </div>
-                            <button onclick="calcularOrcamento()" class="w-full bg-brand-red hover:bg-red-700 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-red-900/30">Calcular Valor Final</button>
+            <!-- Painel Lateral: Calculadora Rápida -->
+            <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold mb-4 text-gray-200">Calculadora de Orçamento</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Valor do Serviço (R$)</label>
+                            <input type="number" id="calc-servico" oninput="calcularOrcamento()" placeholder="0,00" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-gray-100 focus:outline-none focus:border-amber-500">
                         </div>
-                        <div class="bg-neutral-900 p-6 rounded-xl border border-brand-border flex flex-col justify-between">
-                            <div>
-                                <h4 class="text-xs uppercase text-gray-400 font-bold tracking-wider">Resumo do Orçamento</h4>
-                                <div id="orcamento-resultado" class="mt-4 text-2xl font-black text-white">R$ 0,00</div>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-4">* Valores baseados na tabela oficial da Oásis Car Estética em Ribeirão Preto.</p>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Desconto (R$)</label>
+                            <input type="number" id="calc-desconto" oninput="calcularOrcamento()" placeholder="0,00" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-gray-100 focus:outline-none focus:border-amber-500">
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ABA: FINANCEIRO -->
-            <div id="tab-financeiro" class="space-y-6 hidden">
-                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl">
-                    <h3 class="font-bold text-white text-lg mb-4"><i class="fa-solid fa-wallet text-brand-red mr-2"></i> Visão Geral Financeira</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div class="bg-neutral-900 p-5 rounded-xl border border-brand-border">
-                            <p class="text-xs text-gray-400 uppercase">Faturamento Total Confirmado</p>
-                            <h4 id="fin-faturamento" class="text-2xl font-black text-emerald-400 mt-1">R$ 0,00</h4>
-                        </div>
-                        <div class="bg-neutral-900 p-5 rounded-xl border border-brand-border">
-                            <p class="text-xs text-gray-400 uppercase">Ticket Médio por Serviço</p>
-                            <h4 id="fin-ticket" class="text-2xl font-black text-white mt-1">R$ 0,00</h4>
-                        </div>
-                        <div class="bg-neutral-900 p-5 rounded-xl border border-brand-border">
-                            <p class="text-xs text-gray-400 uppercase">Serviços Concluídos</p>
-                            <h4 id="fin-concluidos" class="text-2xl font-black text-brand-red mt-1">0</h4>
+                        <div class="pt-4 border-t border-gray-800">
+                            <span class="block text-xs font-medium text-gray-400 mb-1">Valor Final Sugerido</span>
+                            <div id="orcamento-resultado" class="text-2xl font-bold text-amber-400">R$ 0,00</div>
                         </div>
                     </div>
                 </div>
             </div>
 
         </div>
-    </main>
+    </div>
 
-    <!-- MODAL DE DETALHES DO LEAD -->
-    <div id="modal-lead" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-brand-card border border-brand-border w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-6 border-b border-brand-border flex justify-between items-center bg-neutral-900">
+    <!-- Modal de Detalhes do Lead -->
+    <div id="modal-lead" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-6">
+            <div class="flex justify-between items-start">
                 <div>
-                    <h3 id="modal-cliente-nome" class="font-bold text-lg text-white">Detalhes do Lead</h3>
-                    <p id="modal-cliente-data" class="text-xs text-gray-400">Recebido em --</p>
+                    <h3 id="modal-cliente-nome" class="text-xl font-bold text-gray-100">Nome do Cliente</h3>
+                    <p id="modal-cliente-data" class="text-xs text-gray-400 mt-0.5">Recebido em --</p>
                 </div>
-                <button onclick="fecharModal()" class="text-gray-400 hover:text-white text-lg px-2"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-100 text-lg font-bold px-2 py-1">&times;</button>
             </div>
-            <div class="p-6 overflow-y-auto space-y-6 flex-1">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-neutral-900 p-4 rounded-xl border border-brand-border">
-                        <span class="text-xs text-gray-400 block uppercase font-semibold">Telefone / WhatsApp</span>
-                        <span id="modal-cliente-tel" class="text-sm font-bold text-white mt-1 block">--</span>
-                    </div>
-                    <div class="bg-neutral-900 p-4 rounded-xl border border-brand-border">
-                        <span class="text-xs text-gray-400 block uppercase font-semibold">Veículo</span>
-                        <span id="modal-cliente-veiculo" class="text-sm font-bold text-white mt-1 block">--</span>
-                    </div>
+
+            <div class="grid grid-cols-2 gap-4 bg-gray-950 p-4 rounded-xl border border-gray-800/60">
+                <div>
+                    <span class="block text-xs text-gray-400">Veículo</span>
+                    <span id="modal-cliente-veiculo" class="font-medium text-gray-200">--</span>
                 </div>
-                <div class="bg-neutral-900 p-4 rounded-xl border border-brand-border">
-                    <span class="text-xs text-gray-400 block uppercase font-semibold">Serviço Solicitado</span>
-                    <span id="modal-cliente-servico" class="text-sm font-bold text-brand-red mt-1 block">--</span>
+                <div>
+                    <span class="block text-xs text-gray-400">Serviço Solicitado</span>
+                    <span id="modal-cliente-servico" class="font-medium text-amber-400">--</span>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Status do Lead</label>
-                        <select id="modal-cliente-status" onchange="atualizarStatusLead()" class="w-full bg-neutral-900 border border-brand-border rounded-xl px-4 py-2.5 text-sm text-white focus:border-brand-red">
-                            <option value="NOVO">Novo</option>
-                            <option value="CONTATO REALIZADO">Contato Realizado</option>
-                            <option value="ORÇAMENTO ENVIADO">Orçamento Enviado</option>
-                            <option value="NEGOCIAÇÃO">Negociação</option>
-                            <option value="AGENDADO">Agendado</option>
-                            <option value="CONVERTIDO">Convertido</option>
-                            <option value="PERDIDO">Perdido</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Valor Fechado / Estimado (R$)</label>
-                        <input type="number" id="modal-cliente-valor" onchange="atualizarValorLead()" class="w-full bg-neutral-900 border border-brand-border rounded-xl px-4 py-2.5 text-sm text-white focus:border-brand-red">
-                    </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Status do Lead</label>
+                    <select id="modal-cliente-status" onchange="atualizarStatusLead()" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-gray-100 focus:outline-none focus:border-amber-500">
+                        <option value="NOVO">NOVO</option>
+                        <option value="EM_CONTATO">EM CONTATO</option>
+                        <option value="AGENDADO">AGENDADO</option>
+                        <option value="CONCLUIDO">CONCLUÍDO</option>
+                        <option value="PERDIDO">PERDIDO</option>
+                    </select>
                 </div>
 
-                <!-- Botão de WhatsApp Rápido -->
-                <div class="pt-2">
-                    <a id="btn-whatsapp-direto" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-lg shadow-emerald-900/30">
-                        <i class="fa-brands fa-whatsapp text-lg"></i>
-                        <span>Chamar no WhatsApp com Mensagem Pronta</span>
-                    </a>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Valor Aprovado (R$)</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="modal-cliente-valor" placeholder="0.00" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-gray-100 focus:outline-none focus:border-amber-500">
+                        <button onclick="atualizarValorLead()" class="bg-amber-600 hover:bg-amber-500 text-gray-950 font-semibold px-4 py-2.5 rounded-xl transition-colors">Salvar</button>
+                    </div>
                 </div>
+            </div>
+
+            <div class="pt-4 border-t border-gray-800 flex justify-end gap-3">
+                <button onclick="fecharModal()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors">Fechar</button>
+                <a id="btn-whatsapp-direto" href="#" target="_blank" class="bg-green-600 hover:bg-green-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 transition-colors">
+                    Chamar no WhatsApp
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT DE CONEXÃO E LÓGICA DO CRM -->
+    <!-- Scripts da Aplicação -->
     <script>
-        // CONFIGURAÇÃO SUPABASE
-        const SUPABASE_URL = "https://pyodkkcmuoqrsnnifdqf.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5b2Rra2NtdW9xcnNubmlmZHFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzMjY2MzEsImV4cCI6MjEwMTkwMjYzMX0.QSfkfTNraM9GAgzdFJ8fzXYcaj6MrzqlHodLzsJcIoA";
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Configuração do Supabase (Substitua pelas suas chaves reais se necessário)
+        const SUPABASE_URL = ' SUA_URL_DO_SUPABASE ';
+        const SUPABASE_ANON_KEY = ' SUA_CHAVE_ANON_DO_SUPABASE ';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let leadsCache = [];
         let leadAtualId = null;
+        let leadsCache = [];
 
-        // SISTEMA DE ABAS
-        function switchTab(tabName) {
-            ['dashboard', 'leads', 'agenda', 'orcamentos', 'financeiro'].forEach(t => {
-                document.getElementById(`tab-${t}`).classList.add('hidden');
-                document.getElementById(`nav-${t}`).classList.remove('bg-brand-red', 'text-white', 'shadow-lg', 'shadow-red-900/20');
-                document.getElementById(`nav-${t}`).classList.add('text-gray-400');
-            });
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            document.getElementById(`nav-${tabName}`).classList.add('bg-brand-red', 'text-white', 'shadow-lg', 'shadow-red-900/20');
-            document.getElementById(`nav-${tabName}`).classList.remove('text-gray-400');
-            
-            const titles = {
-                dashboard: 'Dashboard Operacional',
-                leads: 'Central de Leads & CRM',
-                agenda: 'Agenda de Serviços',
-                orcamentos: 'Calculadora de Orçamentos',
-                financeiro: 'Visão Financeira'
-            };
-            document.getElementById('page-title').innerText = titles[tabName];
-        }
-
-        // ALERTA SONORO
+        // Função de Alerta Sonoro para novos leads
         function testAudioAlert() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.frequency.value = 587.33; // Dó
                 gain.gain.setValueAtTime(0.1, ctx.currentTime);
                 osc.connect(gain);
                 gain.connect(ctx.destination);
                 osc.start();
                 osc.stop(ctx.currentTime + 0.3);
-            } catch(e) { console.log("Áudio bloqueado pelo navegador"); }
+            } catch (e) {
+                console.log("Áudio bloqueado pelo navegador até haver interação.");
+            }
         }
 
-        // CARREGAR DADOS DO SUPABASE
+        // Carregar dados dos Leads do Supabase
         async function carregarDados() {
             const { data, error } = await supabaseClient
                 .from('leads')
@@ -410,166 +165,121 @@
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error("Erro ao buscar leads:", error);
+                console.error("Erro ao carregar leads:", error);
                 return;
             }
 
             leadsCache = data || [];
-            atualizarInterface();
+            renderizarTabela();
         }
 
-        // ATUALIZAR INTERFACE E MÉTRICAS
-        function atualizarInterface() {
-            const totalNovos = leadsCache.filter(l => l.status === 'NOVO').length;
-            const totalAtendimento = leadsCache.filter(l => ['CONTATO REALIZADO', 'ORÇAMENTO ENVIADO', 'NEGOCIAÇÃO'].includes(l.status)).length;
-            const totalConvertidos = leadsCache.filter(l => ['CONVERTIDO', 'AGENDADO'].includes(l.status)).length;
-            
-            const faturamentoTotal = leadsCache
-                .filter(l => ['CONVERTIDO', 'AGENDADO'].includes(l.status))
-                .reduce((acc, l) => acc + (Number(l.approved_value) || Number(l.estimated_value) || 0), 0);
-
-            document.getElementById('stat-novos').innerText = totalNovos;
-            document.getElementById('stat-atendimento').innerText = totalAtendimento;
-            document.getElementById('stat-convertidos').innerText = totalConvertidos;
-            document.getElementById('stat-faturamento').innerText = `R$ ${faturamentoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('badge-leads-count').innerText = leadsCache.length;
-
-            // Financeiro
-            document.getElementById('fin-faturamento').innerText = `R$ ${faturamentoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('fin-ticket').innerText = totalConvertidos > 0 ? `R$ ${(faturamentoTotal / totalConvertidos).toLocaleString('pt-BR', {minimumFractionDigits: 2})}` : 'R$ 0,00';
-            document.getElementById('fin-concluidos').innerText = totalConvertidos;
-
-            renderTabelas(leadsCache);
-        }
-
-        function renderTabelas(leads) {
-            const dashTable = document.getElementById('dashboard-leads-table');
-            const fullTable = document.getElementById('full-leads-table');
-
-            if (leads.length === 0) {
-                const emptyHTML = `<tr><td colspan="7" class="py-8 text-center text-gray-500">Nenhum orçamento solicitado ainda.</td></tr>`;
-                dashTable.innerHTML = emptyHTML;
-                fullTable.innerHTML = emptyHTML;
+        // Renderizar a tabela na tela
+        function renderizarTabela() {
+            const tbody = document.getElementById('tabela-leads-corpo');
+            if (leadsCache.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-500">Nenhum lead encontrado.</td></tr>`;
                 return;
             }
 
-            const badgeStatus = (st) => {
-                const colors = {
-                    'NOVO': 'bg-brand-red/20 text-brand-red border-brand-red/30',
-                    'CONTATO REALIZADO': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-                    'ORÇAMENTO ENVIADO': 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-                    'NEGOCIAÇÃO': 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-                    'AGENDADO': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-                    'CONVERTIDO': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-                    'PERDIDO': 'bg-neutral-800 text-gray-400 border-neutral-700'
-                };
-                return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${colors[st] || 'bg-neutral-800 text-gray-300'}">${st}</span>`;
-            };
-
-            dashTable.innerHTML = leads.slice(0, 5).map(l => `
-                <tr class="hover:bg-neutral-900/50 transition-colors cursor-pointer" onclick="abrirModalLead('${l.id}')">
-                    <td class="py-3 px-4 font-semibold text-white">${l.name}</td>
-                    <td class="py-3 px-4 text-gray-400">${l.vehicle}</td>
-                    <td class="py-3 px-4 text-brand-red font-medium">${l.service}</td>
-                    <td class="py-3 px-4">${badgeStatus(l.status)}</td>
-                    <td class="py-3 px-4 text-xs text-gray-500">${new Date(l.created_at).toLocaleString('pt-BR')}</td>
-                    <td class="py-3 px-4 text-right"><i class="fa-solid fa-chevron-right text-gray-600"></i></td>
-                </tr>
-            `).join('');
-
-            fullTable.innerHTML = leads.map(l => `
-                <tr class="hover:bg-neutral-900/50 transition-colors cursor-pointer" onclick="abrirModalLead('${l.id}')">
-                    <td class="py-4 px-4 font-semibold text-white">${l.name}</td>
-                    <td class="py-4 px-4 text-gray-300">${l.phone}</td>
-                    <td class="py-4 px-4 text-gray-400">${l.vehicle}</td>
-                    <td class="py-4 px-4 text-brand-red font-medium">${l.service}</td>
-                    <td class="py-4 px-4">${badgeStatus(l.status)}</td>
-                    <td class="py-4 px-4 text-xs text-gray-500">${new Date(l.created_at).toLocaleString('pt-BR')}</td>
-                    <td class="py-4 px-4 text-right"><button class="bg-neutral-800 hover:bg-neutral-700 p-2 rounded-lg text-xs text-white"><i class="fa-solid fa-pen"></i></button></td>
+            tbody.innerHTML = leadsCache.map(lead => `
+                <tr class="hover:bg-gray-800/40 transition-colors">
+                    <td class="py-3 px-4 font-medium text-gray-200">${lead.name || 'Sem Nome'}</td>
+                    <td class="py-3 px-4 text-gray-300">${lead.vehicle || '--'}</td>
+                    <td class="py-3 px-4 text-amber-400">${lead.service || '--'}</td>
+                    <td class="py-3 px-4">
+                        <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold 
+                            ${lead.status === 'NOVO' ? 'bg-blue-950 text-blue-400 border border-blue-800' : 
+                              lead.status === 'AGENDADO' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 
+                              'bg-gray-800 text-gray-300'}">
+                            ${lead.status || 'NOVO'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="verDetalhes('${lead.id}')" class="bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
+                            Gerenciar
+                        </button>
+                    </td>
                 </tr>
             `).join('');
         }
 
-        // FILTROS DE LEADS
-        function filtrarLeads() {
-            const query = document.getElementById('search-leads').value.toLowerCase();
-            const statusFilter = document.getElementById('filter-status').value;
-
-            const filtered = leadsCache.filter(l => {
-                const matchQuery = l.name.toLowerCase().includes(query) || l.phone.toLowerCase().includes(query) || l.vehicle.toLowerCase().includes(query);
-                const matchStatus = statusFilter === '' || l.status === statusFilter;
-                return matchQuery && matchStatus;
-            });
-
-            renderTabelas(filtered);
-        }
-
-        // MODAL DE DETALHES
-        function abrirModalLead(id) {
+        // Abrir Modal de Detalhes
+        function verDetalhes(id) {
             const lead = leadsCache.find(l => l.id === id);
             if (!lead) return;
 
-            leadAtualId = id;
-            document.getElementById('modal-cliente-nome').innerText = lead.name;
-            document.getElementById('modal-cliente-tel').innerText = lead.phone;
-            document.getElementById('modal-cliente-veiculo').innerText = lead.vehicle;
-            document.getElementById('modal-cliente-servico').innerText = lead.service;
-            document.getElementById('modal-cliente-data').innerText = `Recebido em: ${new Date(lead.created_at).toLocaleString('pt-BR')}`;
+            leadAtualId = lead.id;
+            document.getElementById('modal-cliente-nome').innerText = lead.name || 'Cliente';
+            document.getElementById('modal-cliente-veiculo').innerText = lead.vehicle || '--';
+            document.getElementById('modal-cliente-servico').innerText = lead.service || '--';
             document.getElementById('modal-cliente-status').value = lead.status || 'NOVO';
             document.getElementById('modal-cliente-valor').value = lead.approved_value || lead.estimated_value || '';
+            document.getElementById('modal-cliente-data').innerText = `Recebido em ${lead.created_at ? new Date(lead.created_at).toLocaleString('pt-BR') : '--'}`;
 
-            // Link WhatsApp com mensagem personalizada
-            const msg = encodeURIComponent(`Olá, ${lead.name}! Aqui é da Oásis Car Estética. Recebemos sua solicitação de orçamento para o serviço de ${lead.service} no veículo ${lead.vehicle}. Tudo bem?`);
-            document.getElementById('btn-whatsapp-direto').href = `https://wa.me/55${lead.phone.replace(/\D/g, '')}?text=${msg}`;
+            const phoneClean = (lead.phone || '').replace(/\D/g, '');
+            const mensagem = encodeURIComponent(`Olá ${lead.name || 'Cliente'}, tudo bem? Aqui é da Oásis Car Estética em Ribeirão Preto. Vi sua solicitação para o veículo ${lead.vehicle || 'seu carro'} referente ao serviço de ${lead.service}. Como podemos ajudar?`);
+            document.getElementById('btn-whatsapp-direto').href = `https://wa.me/55${phoneClean}?text=${mensagem}`;
 
             document.getElementById('modal-lead').classList.remove('hidden');
         }
 
+        // Fechar Modal
         function fecharModal() {
             document.getElementById('modal-lead').classList.add('hidden');
             leadAtualId = null;
         }
 
+        // Atualizar Status do Lead no Supabase
         async function atualizarStatusLead() {
             if (!leadAtualId) return;
             const novoStatus = document.getElementById('modal-cliente-status').value;
-            
-            await supabaseClient.from('leads').update({ status: novoStatus }).eq('id', leadAtualId);
+            const { error } = await supabaseClient
+                .from('leads')
+                .update({ status: novoStatus })
+                .eq('id', leadAtualId);
+
+            if (error) {
+                console.error("Erro ao atualizar status:", error);
+                return;
+            }
             carregarDados();
         }
 
+        // Atualizar Valor Aprovado do Lead no Supabase
         async function atualizarValorLead() {
             if (!leadAtualId) return;
             const novoValor = parseFloat(document.getElementById('modal-cliente-valor').value) || 0;
-            
-            await supabaseClient.from('leads').update({ approved_value: novoValor }).eq('id', leadAtualId);
+            const { error } = await supabaseClient
+                .from('leads')
+                .update({ approved_value: novoValor })
+                .eq('id', leadAtualId);
+
+            if (error) {
+                console.error("Erro ao atualizar valor:", error);
+                return;
+            }
             carregarDados();
         }
 
-        // CALCULADORA DE ORÇAMENTOS
+        // Calculadora de Orçamento
         function calcularOrcamento() {
-            const servicoVal = parseFloat(document.getElementById('calc-servico').value) || 0;
+            const servico = parseFloat(document.getElementById('calc-servico').value) || 0;
             const desconto = parseFloat(document.getElementById('calc-desconto').value) || 0;
-            const total = Math.max(0, servicoVal - desconto);
-            document.getElementById('orcamento-resultado').innerText = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            const total = Math.max(0, servico - desconto);
+            document.getElementById('orcamento-resultado').innerText = `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
         }
 
-        // REALTIME SUBSCRIPTION
-        function iniciarRealtime() {
-            supabaseClient
-                .channel('public:leads')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, payload => {
-                    testAudioAlert();
-                    carregarDados();
-                })
-                .subscribe();
-        }
+        // Inicialização da Aplicação
+        carregarDados();
 
-        // INICIALIZAÇÃO
-        window.onload = () => {
-            carregarDados();
-            iniciarRealtime();
-        };
+        // Listener Realtime do Supabase para novos leads com alerta sonoro
+        supabaseClient
+            .channel('public:leads')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, payload => {
+                testAudioAlert();
+                carregarDados();
+            })
+            .subscribe();
     </script>
 </body>
 </html>
