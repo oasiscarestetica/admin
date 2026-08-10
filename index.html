@@ -1,227 +1,575 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Controle | Oásis Car Estética</title>
+    <title>OÁSIS CAR | Central de Leads & CRM</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; color: #ffffff; }
-        .pulse-red { animation: pulseRed 1.5s infinite; }
-        @keyframes pulseRed {
-            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#DC2626',
+                            darkred: '#991B1B',
+                            dark: '#0A0A0A',
+                            card: '#121212',
+                            border: '#262626'
+                        }
+                    }
+                }
+            }
         }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #262626; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #DC2626; }
     </style>
 </head>
-<body class="p-4 sm:p-8">
+<body class="bg-brand-dark text-gray-100 min-h-screen flex flex-col lg:flex-row antialiased">
 
-    <!-- CABEÇALHO -->
-    <header class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center pb-6 border-b border-neutral-800 gap-4">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-red-600/20 flex items-center justify-center text-red-500 font-extrabold text-xl">
-                O
+    <!-- SIDEBAR -->
+    <aside class="w-full lg:w-64 bg-brand-card border-r border-brand-border flex flex-col justify-between shrink-0">
+        <div>
+            <!-- Logo Header -->
+            <div class="p-6 border-b border-brand-border flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-red flex items-center justify-center text-white font-black text-xl shadow-lg shadow-red-900/30">
+                    O
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-wider text-white">OÁSIS CAR</h1>
+                    <p class="text-xs text-brand-red font-semibold uppercase tracking-widest">Estética Automotiva</p>
+                </div>
             </div>
+
+            <!-- Navegação -->
+            <nav class="p-4 space-y-1.5">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-brand-red text-white shadow-lg shadow-red-900/20">
+                    <i class="fa-solid fa-chart-pie w-5"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button onclick="switchTab('leads')" id="nav-leads" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-gray-400 hover:text-white hover:bg-neutral-900">
+                    <i class="fa-solid fa-fire w-5"></i>
+                    <span>Central de Leads</span>
+                    <span id="badge-leads-count" class="ml-auto bg-brand-red/20 text-brand-red text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+                </button>
+                <button onclick="switchTab('agenda')" id="nav-agenda" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-gray-400 hover:text-white hover:bg-neutral-900">
+                    <i class="fa-solid fa-calendar-days w-5"></i>
+                    <span>Agenda</span>
+                </button>
+                <button onclick="switchTab('orcamentos')" id="nav-orcamentos" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-gray-400 hover:text-white hover:bg-neutral-900">
+                    <i class="fa-solid fa-file-invoice-dollar w-5"></i>
+                    <span>Orçamentos</span>
+                </button>
+                <button onclick="switchTab('financeiro')" id="nav-financeiro" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-gray-400 hover:text-white hover:bg-neutral-900">
+                    <i class="fa-solid fa-wallet w-5"></i>
+                    <span>Financeiro</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Status Rodapé Sidebar -->
+        <div class="p-4 border-t border-brand-border">
+            <div class="bg-neutral-900/80 p-3 rounded-xl border border-brand-border flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span class="text-xs font-medium text-gray-300">Live Realtime</span>
+                </div>
+                <button onclick="testAudioAlert()" class="text-xs text-gray-400 hover:text-white bg-neutral-800 px-2 py-1 rounded-lg" title="Testar Alerta Sonoro">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        
+        <!-- Header Superior -->
+        <header class="bg-brand-card border-b border-brand-border px-6 py-4 flex items-center justify-between sticky top-0 z-20">
             <div>
-                <h1 class="text-xl font-bold tracking-tight">OÁSIS CAR <span class="text-red-600">CENTRAL DE LEADS</span></h1>
-                <p class="text-xs text-neutral-400">Atendimento e Orçamentos em Tempo Real</p>
+                <h2 id="page-title" class="text-xl font-bold text-white">Dashboard Operacional</h2>
+                <p class="text-xs text-gray-400">Ribeirão Preto - SP | Gestão Comercial em Tempo Real</p>
             </div>
-        </div>
-        <div class="flex items-center gap-4">
-            <div id="statusConexao" class="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/50">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Monitorando ao Vivo
+            <div class="flex items-center space-x-4">
+                <button onclick="carregarDados()" class="bg-neutral-900 hover:bg-neutral-800 border border-brand-border px-4 py-2 rounded-xl text-xs font-semibold text-gray-300 flex items-center space-x-2 transition-all">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Atualizar Dados</span>
+                </button>
             </div>
-            <button onclick="testarSom()" class="text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-3 py-1.5 rounded-lg border border-neutral-700 transition">
-                <i class="fa-solid fa-volume-high mr-1"></i> Testar Alerta
-            </button>
-        </div>
-    </header>
+        </header>
 
-    <!-- METRICAS RÁPIDAS -->
-    <main class="max-w-6xl mx-auto py-8">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <div class="bg-neutral-900/80 border border-neutral-800 p-5 rounded-2xl flex items-center justify-between">
-                <div>
-                    <span class="text-xs text-neutral-400 font-medium">Urgentes / Não Atendidos</span>
-                    <h2 id="totalNovos" class="text-3xl font-extrabold text-red-500 mt-1">0</h2>
+        <!-- CONTAINER DAS ABAS -->
+        <div class="p-6 flex-1">
+
+            <!-- ABA: DASHBOARD -->
+            <div id="tab-dashboard" class="space-y-6">
+                <!-- Cards de Indicadores -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-brand-card border border-brand-border p-5 rounded-2xl relative overflow-hidden">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-gray-400 uppercase">Novos Leads</p>
+                                <h3 id="stat-novos" class="text-3xl font-extrabold text-white mt-1">0</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl bg-brand-red/10 border border-brand-red/20 flex items-center justify-center text-brand-red">
+                                <i class="fa-solid fa-fire text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-brand-card border border-brand-border p-5 rounded-2xl relative overflow-hidden">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-gray-400 uppercase">Em Atendimento</p>
+                                <h3 id="stat-atendimento" class="text-3xl font-extrabold text-white mt-1">0</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
+                                <i class="fa-solid fa-comments text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-brand-card border border-brand-border p-5 rounded-2xl relative overflow-hidden">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-gray-400 uppercase">Convertidos</p>
+                                <h3 id="stat-convertidos" class="text-3xl font-extrabold text-white mt-1">0</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
+                                <i class="fa-solid fa-circle-check text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-brand-card border border-brand-border p-5 rounded-2xl relative overflow-hidden">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-gray-400 uppercase">Faturamento Fechado</p>
+                                <h3 id="stat-faturamento" class="text-2xl font-extrabold text-emerald-400 mt-1">R$ 0,00</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
+                                <i class="fa-solid fa-dollar-sign text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 text-xl">
-                    <i class="fa-solid fa-bell"></i>
+
+                <!-- Tabela Rápida na Dashboard -->
+                <div class="bg-brand-card border border-brand-border rounded-2xl p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-white text-base">Últimas Solicitações Recebidas</h3>
+                        <button onclick="switchTab('leads')" class="text-xs text-brand-red font-semibold hover:underline">Ver todos os leads →</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b border-brand-border text-gray-400 text-xs uppercase tracking-wider">
+                                    <th class="py-3 px-4">Cliente</th>
+                                    <th class="py-3 px-4">Veículo</th>
+                                    <th class="py-3 px-4">Serviço</th>
+                                    <th class="py-3 px-4">Status</th>
+                                    <th class="py-3 px-4">Data/Hora</th>
+                                    <th class="py-3 px-4 text-right">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboard-leads-table" class="divide-y divide-brand-border text-gray-300">
+                                <tr><td colspan="6" class="py-6 text-center text-gray-500">Carregando leads...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-neutral-900/80 border border-neutral-800 p-5 rounded-2xl flex items-center justify-between">
-                <div>
-                    <span class="text-xs text-neutral-400 font-medium">Atendidos Hoje</span>
-                    <h2 id="totalAtendidos" class="text-3xl font-extrabold text-emerald-500 mt-1">0</h2>
+            <!-- ABA: LEADS (CENTRAL COMPLETA) -->
+            <div id="tab-leads" class="space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-brand-card border border-brand-border p-4 rounded-2xl">
+                    <div class="relative flex-1 w-full sm:max-w-md">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-500"></i>
+                        <input type="text" id="search-leads" onkeyup="filtrarLeads()" placeholder="Buscar por nome, telefone ou veículo..." class="w-full bg-neutral-900 border border-brand-border rounded-xl pl-11 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-red">
+                    </div>
+                    <div class="flex items-center space-x-3 w-full sm:w-auto">
+                        <select id="filter-status" onchange="filtrarLeads()" class="bg-neutral-900 border border-brand-border rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-red">
+                            <option value="">Todos os Status</option>
+                            <option value="NOVO">Novo</option>
+                            <option value="CONTATO REALIZADO">Contato Realizado</option>
+                            <option value="ORÇAMENTO ENVIADO">Orçamento Enviado</option>
+                            <option value="NEGOCIAÇÃO">Negociação</option>
+                            <option value="AGENDADO">Agendado</option>
+                            <option value="CONVERTIDO">Convertido</option>
+                            <option value="PERDIDO">Perdido</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-xl">
-                    <i class="fa-solid fa-check-double"></i>
+
+                <div class="bg-brand-card border border-brand-border rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b border-brand-border text-gray-400 text-xs uppercase tracking-wider bg-neutral-900/50">
+                                    <th class="py-3.5 px-4">Cliente</th>
+                                    <th class="py-3.5 px-4">Contato</th>
+                                    <th class="py-3.5 px-4">Veículo</th>
+                                    <th class="py-3.5 px-4">Serviço</th>
+                                    <th class="py-3.5 px-4">Status</th>
+                                    <th class="py-3.5 px-4">Data/Hora</th>
+                                    <th class="py-3.5 px-4 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="full-leads-table" class="divide-y divide-brand-border text-gray-300">
+                                <tr><td colspan="7" class="py-8 text-center text-gray-500">Carregando base de leads...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-neutral-900/80 border border-neutral-800 p-5 rounded-2xl flex items-center justify-between">
-                <div>
-                    <span class="text-xs text-neutral-400 font-medium">Total Solicitados</span>
-                    <h2 id="totalGeral" class="text-3xl font-extrabold text-white mt-1">0</h2>
-                </div>
-                <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white text-xl">
-                    <i class="fa-solid fa-car"></i>
+            <!-- ABA: AGENDA -->
+            <div id="tab-agenda" class="space-y-6 hidden">
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl">
+                    <h3 class="font-bold text-white text-lg mb-4"><i class="fa-solid fa-calendar-days text-brand-red mr-2"></i> Agendamentos de Serviços</h3>
+                    <div id="agenda-list" class="space-y-3">
+                        <p class="text-gray-500 text-sm">Nenhum agendamento registrado até o momento.</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- LISTA DE LEADS -->
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-bold flex items-center gap-2">
-                <i class="fa-solid fa-fire text-red-500"></i> Fila de Atendimento
-            </h3>
-            <span class="text-xs text-neutral-500">Atualização instantânea sem recarregar</span>
-        </div>
-
-        <div id="listaLeads" class="space-y-4">
-            <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-8 text-center text-neutral-500 text-sm">
-                Carregando solicitação de orçamentos...
+            <!-- ABA: ORÇAMENTOS -->
+            <div id="tab-orcamentos" class="space-y-6 hidden">
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl">
+                    <h3 class="font-bold text-white text-lg mb-4"><i class="fa-solid fa-calculator text-brand-red mr-2"></i> Calculadora & Simulador de Orçamentos</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Serviço Principal</label>
+                                <select id="calc-servico" class="w-full bg-neutral-900 border border-brand-border rounded-xl px-4 py-2.5 text-sm text-white">
+                                    <option value="400">Polimento Técnico — R$ 400</option>
+                                    <option value="800">Vitrificação de Pintura — R$ 800</option>
+                                    <option value="250">Higienização Interna — R$ 250</option>
+                                    <option value="150">Restauração de Faróis — R$ 150</option>
+                                    <option value="1500">Proteção PPF (Parcial) — R$ 1.500</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Desconto Aplicado (R$)</label>
+                                <input type="number" id="calc-desconto" value="0" class="w-full bg-neutral-900 border border-brand-border rounded-xl px-4 py-2.5 text-sm text-white">
+                            </div>
+                            <button onclick="calcularOrcamento()" class="w-full bg-brand-red hover:bg-red-700 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-red-900/30">Calcular Valor Final</button>
+                        </div>
+                        <div class="bg-neutral-900 p-6 rounded-xl border border-brand-border flex flex-col justify-between">
+                            <div>
+                                <h4 class="text-xs uppercase text-gray-400 font-bold tracking-wider">Resumo do Orçamento</h4>
+                                <div id="orcamento-resultado" class="mt-4 text-2xl font-black text-white">R$ 0,00</div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-4">* Valores baseados na tabela oficial da Oásis Car Estética em Ribeirão Preto.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- ABA: FINANCEIRO -->
+            <div id="tab-financeiro" class="space-y-6 hidden">
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl">
+                    <h3 class="font-bold text-white text-lg mb-4"><i class="fa-solid fa-wallet text-brand-red mr-2"></i> Visão Geral Financeira</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-neutral-900 p-5 rounded-xl border border-brand-border">
+                            <p class="text-xs text-gray-400 uppercase">Faturamento Total Confirmado</p>
+                            <h4 id="fin-faturamento" class="text-2xl font-black text-emerald-400 mt-1">R$ 0,00</h4>
+                        </div>
+                        <div class="bg-neutral-900 p-5 rounded-xl border border-brand-border">
+                            <p class="text-xs text-gray-400 uppercase">Ticket Médio por Serviço</p>
+                            <h4 id="fin-ticket" class="text-2xl font-black text-white mt-1">R$ 0,00</h4>
+                        </div>
+                        <div class="bg-neutral-900 p-5 rounded-xl border border-brand-border">
+                            <p class="text-xs text-gray-400 uppercase">Serviços Concluídos</p>
+                            <h4 id="fin-concluidos" class="text-2xl font-black text-brand-red mt-1">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 
+    <!-- MODAL DE DETALHES DO LEAD -->
+    <div id="modal-lead" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-brand-card border border-brand-border w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-brand-border flex justify-between items-center bg-neutral-900">
+                <div>
+                    <h3 id="modal-cliente-nome" class="font-bold text-lg text-white">Detalhes do Lead</h3>
+                    <p id="modal-cliente-data" class="text-xs text-gray-400">Recebido em --</p>
+                </div>
+                <button onclick="fecharModal()" class="text-gray-400 hover:text-white text-lg px-2"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6 flex-1">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-neutral-900 p-4 rounded-xl border border-brand-border">
+                        <span class="text-xs text-gray-400 block uppercase font-semibold">Telefone / WhatsApp</span>
+                        <span id="modal-cliente-tel" class="text-sm font-bold text-white mt-1 block">--</span>
+                    </div>
+                    <div class="bg-neutral-900 p-4 rounded-xl border border-brand-border">
+                        <span class="text-xs text-gray-400 block uppercase font-semibold">Veículo</span>
+                        <span id="modal-cliente-veiculo" class="text-sm font-bold text-white mt-1 block">--</span>
+                    </div>
+                </div>
+                <div class="bg-neutral-900 p-4 rounded-xl border border-brand-border">
+                    <span class="text-xs text-gray-400 block uppercase font-semibold">Serviço Solicitado</span>
+                    <span id="modal-cliente-servico" class="text-sm font-bold text-brand-red mt-1 block">--</span>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Status do Lead</label>
+                        <select id="modal-cliente-status" onchange="atualizarStatusLead()" class="w-full bg-neutral-900 border border-brand-border rounded-xl px-4 py-2.5 text-sm text-white focus:border-brand-red">
+                            <option value="NOVO">Novo</option>
+                            <option value="CONTATO REALIZADO">Contato Realizado</option>
+                            <option value="ORÇAMENTO ENVIADO">Orçamento Enviado</option>
+                            <option value="NEGOCIAÇÃO">Negociação</option>
+                            <option value="AGENDADO">Agendado</option>
+                            <option value="CONVERTIDO">Convertido</option>
+                            <option value="PERDIDO">Perdido</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Valor Fechado / Estimado (R$)</label>
+                        <input type="number" id="modal-cliente-valor" onchange="atualizarValorLead()" class="w-full bg-neutral-900 border border-brand-border rounded-xl px-4 py-2.5 text-sm text-white focus:border-brand-red">
+                    </div>
+                </div>
+
+                <!-- Botão de WhatsApp Rápido -->
+                <div class="pt-2">
+                    <a id="btn-whatsapp-direto" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-lg shadow-emerald-900/30">
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
+                        <span>Chamar no WhatsApp com Mensagem Pronta</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE CONEXÃO E LÓGICA DO CRM -->
     <script>
-       // CONEXÃO COM O SUPABASE
+        // CONFIGURAÇÃO SUPABASE
         const SUPABASE_URL = "https://pyodkkcmuoqrsnnifdqf.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5b2Rra2NtdW9xcnNubmlmZHFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzMjY2MzEsImV4cCI6MjEwMTkwMjYzMX0.QSfkfTNraM9GAgzdFJ8fzXYcaj6MrzqlHodLzsJcIoA";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let audioCtx = null;
+        let leadsCache = [];
+        let leadAtualId = null;
 
-        function tocarAlerta() {
+        // SISTEMA DE ABAS
+        function switchTab(tabName) {
+            ['dashboard', 'leads', 'agenda', 'orcamentos', 'financeiro'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`nav-${t}`).classList.remove('bg-brand-red', 'text-white', 'shadow-lg', 'shadow-red-900/20');
+                document.getElementById(`nav-${t}`).classList.add('text-gray-400');
+            });
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`nav-${tabName}`).classList.add('bg-brand-red', 'text-white', 'shadow-lg', 'shadow-red-900/20');
+            document.getElementById(`nav-${tabName}`).classList.remove('text-gray-400');
+            
+            const titles = {
+                dashboard: 'Dashboard Operacional',
+                leads: 'Central de Leads & CRM',
+                agenda: 'Agenda de Serviços',
+                orcamentos: 'Calculadora de Orçamentos',
+                financeiro: 'Visão Financeira'
+            };
+            document.getElementById('page-title').innerText = titles[tabName];
+        }
+
+        // ALERTA SONORO
+        function testAudioAlert() {
             try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.5);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
                 osc.connect(gain);
-                gain.connect(audioCtx.destination);
+                gain.connect(ctx.destination);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.5);
-            } catch (e) { console.log(e); }
+                osc.stop(ctx.currentTime + 0.3);
+            } catch(e) { console.log("Áudio bloqueado pelo navegador"); }
         }
 
-        function testarSom() {
-            tocarAlerta();
-        }
-
-        function calcularTempo(dataISO) {
-            const minutos = Math.floor((new Date() - new Date(dataISO)) / 60000);
-            if (minutos < 1) return "Agora mesmo 🔥";
-            if (minutos === 1) return "Há 1 min ⏳";
-            if (minutos < 60) return `Há ${minutos} mins ⏳`;
-            const horas = Math.floor(minutos / 60);
-            return `Há ${horas}h ⏳`;
-        }
-
-        async function carregarLeads() {
-            const { data: leads, error } = await supabaseClient
-                .from('orcamentos')
+        // CARREGAR DADOS DO SUPABASE
+        async function carregarDados() {
+            const { data, error } = await supabaseClient
+                .from('leads')
                 .select('*')
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error(error);
+                console.error("Erro ao buscar leads:", error);
                 return;
             }
 
-            renderizarLeads(leads);
+            leadsCache = data || [];
+            atualizarInterface();
         }
 
-        function renderizarLeads(leads) {
-            const container = document.getElementById('listaLeads');
-            let novos = 0;
-            let atendidos = 0;
+        // ATUALIZAR INTERFACE E MÉTRICAS
+        function atualizarInterface() {
+            const totalNovos = leadsCache.filter(l => l.status === 'NOVO').length;
+            const totalAtendimento = leadsCache.filter(l => ['CONTATO REALIZADO', 'ORÇAMENTO ENVIADO', 'NEGOCIAÇÃO'].includes(l.status)).length;
+            const totalConvertidos = leadsCache.filter(l => ['CONVERTIDO', 'AGENDADO'].includes(l.status)).length;
+            
+            const faturamentoTotal = leadsCache
+                .filter(l => ['CONVERTIDO', 'AGENDADO'].includes(l.status))
+                .reduce((acc, l) => acc + (Number(l.approved_value) || Number(l.estimated_value) || 0), 0);
 
-            if (!leads || leads.length === 0) {
-                container.innerHTML = `<div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-12 text-center text-neutral-500 text-sm">Nenhum orçamento solicitado ainda.</div>`;
-                document.getElementById('totalNovos').innerText = '0';
-                document.getElementById('totalAtendidos').innerText = '0';
-                document.getElementById('totalGeral').innerText = '0';
+            document.getElementById('stat-novos').innerText = totalNovos;
+            document.getElementById('stat-atendimento').innerText = totalAtendimento;
+            document.getElementById('stat-convertidos').innerText = totalConvertidos;
+            document.getElementById('stat-faturamento').innerText = `R$ ${faturamentoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('badge-leads-count').innerText = leadsCache.length;
+
+            // Financeiro
+            document.getElementById('fin-faturamento').innerText = `R$ ${faturamentoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('fin-ticket').innerText = totalConvertidos > 0 ? `R$ ${(faturamentoTotal / totalConvertidos).toLocaleString('pt-BR', {minimumFractionDigits: 2})}` : 'R$ 0,00';
+            document.getElementById('fin-concluidos').innerText = totalConvertidos;
+
+            renderTabelas(leadsCache);
+        }
+
+        function renderTabelas(leads) {
+            const dashTable = document.getElementById('dashboard-leads-table');
+            const fullTable = document.getElementById('full-leads-table');
+
+            if (leads.length === 0) {
+                const emptyHTML = `<tr><td colspan="7" class="py-8 text-center text-gray-500">Nenhum orçamento solicitado ainda.</td></tr>`;
+                dashTable.innerHTML = emptyHTML;
+                fullTable.innerHTML = emptyHTML;
                 return;
             }
 
-            container.innerHTML = '';
+            const badgeStatus = (st) => {
+                const colors = {
+                    'NOVO': 'bg-brand-red/20 text-brand-red border-brand-red/30',
+                    'CONTATO REALIZADO': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+                    'ORÇAMENTO ENVIADO': 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+                    'NEGOCIAÇÃO': 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+                    'AGENDADO': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+                    'CONVERTIDO': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+                    'PERDIDO': 'bg-neutral-800 text-gray-400 border-neutral-700'
+                };
+                return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${colors[st] || 'bg-neutral-800 text-gray-300'}">${st}</span>`;
+            };
 
-            leads.forEach(lead => {
-                if (lead.status === 'Novo') novos++;
-                if (lead.status === 'Atendido') atendidos++;
+            dashTable.innerHTML = leads.slice(0, 5).map(l => `
+                <tr class="hover:bg-neutral-900/50 transition-colors cursor-pointer" onclick="abrirModalLead('${l.id}')">
+                    <td class="py-3 px-4 font-semibold text-white">${l.name}</td>
+                    <td class="py-3 px-4 text-gray-400">${l.vehicle}</td>
+                    <td class="py-3 px-4 text-brand-red font-medium">${l.service}</td>
+                    <td class="py-3 px-4">${badgeStatus(l.status)}</td>
+                    <td class="py-3 px-4 text-xs text-gray-500">${new Date(l.created_at).toLocaleString('pt-BR')}</td>
+                    <td class="py-3 px-4 text-right"><i class="fa-solid fa-chevron-right text-gray-600"></i></td>
+                </tr>
+            `).join('');
 
-                const ehNovo = lead.status === 'Novo';
-                const tempoExtenso = calcularTempo(lead.created_at);
+            fullTable.innerHTML = leads.map(l => `
+                <tr class="hover:bg-neutral-900/50 transition-colors cursor-pointer" onclick="abrirModalLead('${l.id}')">
+                    <td class="py-4 px-4 font-semibold text-white">${l.name}</td>
+                    <td class="py-4 px-4 text-gray-300">${l.phone}</td>
+                    <td class="py-4 px-4 text-gray-400">${l.vehicle}</td>
+                    <td class="py-4 px-4 text-brand-red font-medium">${l.service}</td>
+                    <td class="py-4 px-4">${badgeStatus(l.status)}</td>
+                    <td class="py-4 px-4 text-xs text-gray-500">${new Date(l.created_at).toLocaleString('pt-BR')}</td>
+                    <td class="py-4 px-4 text-right"><button class="bg-neutral-800 hover:bg-neutral-700 p-2 rounded-lg text-xs text-white"><i class="fa-solid fa-pen"></i></button></td>
+                </tr>
+            `).join('');
+        }
 
-                const card = document.createElement('div');
-                card.className = `bg-neutral-900 border ${ehNovo ? 'border-red-600/80 pulse-red' : 'border-neutral-800 opacity-75'} rounded-2xl p-5 sm:p-6 transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-4`;
+        // FILTROS DE LEADS
+        function filtrarLeads() {
+            const query = document.getElementById('search-leads').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-status').value;
 
-                card.innerHTML = `
-                    <div class="space-y-1">
-                        <div class="flex items-center gap-3">
-                            <span class="font-bold text-lg text-white">${lead.nome}</span>
-                            ${ehNovo 
-                                ? `<span class="bg-red-600/20 text-red-500 border border-red-600/50 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">RESPOSTA URGENTE</span>`
-                                : `<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 text-[10px] font-semibold px-2.5 py-0.5 rounded-full">Atendido</span>`
-                            }
-                            <span class="text-xs text-neutral-400"><i class="fa-regular fa-clock mr-1"></i>${tempoExtenso}</span>
-                        </div>
-                        <div class="text-sm text-neutral-300 flex flex-wrap gap-x-4 gap-y-1 pt-1">
-                            <span><strong class="text-neutral-500">Veículo:</strong> ${lead.veiculo}</span>
-                            <span><strong class="text-neutral-500">Serviço:</strong> <span class="text-red-400 font-semibold">${lead.servico}</span></span>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-3 w-full md:w-auto">
-                        ${ehNovo ? `
-                            <button onclick="marcarAtendido(${lead.id})" class="flex-1 md:flex-none text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-semibold px-4 py-3 rounded-xl border border-neutral-700 transition">
-                                <i class="fa-solid fa-check mr-1"></i> Marcar Concluído
-                            </button>
-                        ` : ''}
-                        <button onclick="responderCliente('${lead.nome}', '${lead.servico}')" class="flex-1 md:flex-none text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-3 rounded-xl shadow-lg shadow-emerald-900/20 transition flex items-center justify-center gap-2">
-                            <i class="fa-brands fa-whatsapp text-base"></i> Conversar Agora
-                        </button>
-                    </div>
-                `;
-
-                container.appendChild(card);
+            const filtered = leadsCache.filter(l => {
+                const matchQuery = l.name.toLowerCase().includes(query) || l.phone.toLowerCase().includes(query) || l.vehicle.toLowerCase().includes(query);
+                const matchStatus = statusFilter === '' || l.status === statusFilter;
+                return matchQuery && matchStatus;
             });
 
-            document.getElementById('totalNovos').innerText = novos;
-            document.getElementById('totalAtendidos').innerText = atendidos;
-            document.getElementById('totalGeral').innerText = leads.length;
+            renderTabelas(filtered);
         }
 
-        async function marcarAtendido(id) {
-            await supabaseClient.from('orcamentos').update({ status: 'Atendido' }).eq('id', id);
-            carregarLeads();
+        // MODAL DE DETALHES
+        function abrirModalLead(id) {
+            const lead = leadsCache.find(l => l.id === id);
+            if (!lead) return;
+
+            leadAtualId = id;
+            document.getElementById('modal-cliente-nome').innerText = lead.name;
+            document.getElementById('modal-cliente-tel').innerText = lead.phone;
+            document.getElementById('modal-cliente-veiculo').innerText = lead.vehicle;
+            document.getElementById('modal-cliente-servico').innerText = lead.service;
+            document.getElementById('modal-cliente-data').innerText = `Recebido em: ${new Date(lead.created_at).toLocaleString('pt-BR')}`;
+            document.getElementById('modal-cliente-status').value = lead.status || 'NOVO';
+            document.getElementById('modal-cliente-valor').value = lead.approved_value || lead.estimated_value || '';
+
+            // Link WhatsApp com mensagem personalizada
+            const msg = encodeURIComponent(`Olá, ${lead.name}! Aqui é da Oásis Car Estética. Recebemos sua solicitação de orçamento para o serviço de ${lead.service} no veículo ${lead.vehicle}. Tudo bem?`);
+            document.getElementById('btn-whatsapp-direto').href = `https://wa.me/55${lead.phone.replace(/\D/g, '')}?text=${msg}`;
+
+            document.getElementById('modal-lead').classList.remove('hidden');
         }
 
-        function responderCliente(nome, servico) {
-            const texto = `Olá ${nome}, tudo bem? Sou da Oásis Car Estética. Vi que você solicitou um orçamento para o serviço de ${servico}. Como posso te ajudar hoje?`;
-            window.open(`https://wa.me/5516991408438?text=${encodeURIComponent(texto)}`, '_blank');
+        function fecharModal() {
+            document.getElementById('modal-lead').classList.add('hidden');
+            leadAtualId = null;
         }
 
-        supabaseClient
-            .channel('orcamentos-channel')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orcamentos' }, payload => {
-                tocarAlerta();
-                carregarLeads();
-            })
-            .subscribe();
+        async function atualizarStatusLead() {
+            if (!leadAtualId) return;
+            const novoStatus = document.getElementById('modal-cliente-status').value;
+            
+            await supabaseClient.from('leads').update({ status: novoStatus }).eq('id', leadAtualId);
+            carregarDados();
+        }
 
-        carregarLeads();
+        async function atualizarValorLead() {
+            if (!leadAtualId) return;
+            const novoValor = parseFloat(document.getElementById('modal-cliente-valor').value) || 0;
+            
+            await supabaseClient.from('leads').update({ approved_value: novoValor }).eq('id', leadAtualId);
+            carregarDados();
+        }
+
+        // CALCULADORA DE ORÇAMENTOS
+        function calcularOrcamento() {
+            const servicoVal = parseFloat(document.getElementById('calc-servico').value) || 0;
+            const desconto = parseFloat(document.getElementById('calc-desconto').value) || 0;
+            const total = Math.max(0, servicoVal - desconto);
+            document.getElementById('orcamento-resultado').innerText = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+        }
+
+        // REALTIME SUBSCRIPTION
+        function iniciarRealtime() {
+            supabaseClient
+                .channel('public:leads')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, payload => {
+                    testAudioAlert();
+                    carregarDados();
+                })
+                .subscribe();
+        }
+
+        // INICIALIZAÇÃO
+        window.onload = () => {
+            carregarDados();
+            iniciarRealtime();
+        };
     </script>
 </body>
 </html>
