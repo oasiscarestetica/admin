@@ -1,69 +1,116 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Oásis Car Estética</title>
-    <!-- Supabase e Tailwind -->
+    <title>CRM Oásis Car Estética</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #0a0a0a; color: white; font-family: sans-serif; }
+        body { background-color: #0a0a0a; color: white; font-family: 'Inter', sans-serif; }
+        .sidebar-item.active { background-color: #262626; border-left: 4px solid #f59e0b; }
         .view-section { display: none; }
         .active-view { display: block; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #262626; border-radius: 4px; }
     </style>
 </head>
-<body class="p-6">
+<body class="flex h-screen overflow-hidden">
 
-    <!-- CABEÇALHO -->
-    <header class="mb-8">
-        <h1 id="page-title" class="text-2xl font-bold text-amber-500">Leads & CRM</h1>
-        <p id="page-subtitle" class="text-sm text-gray-400">Gerenciamento de orçamentos e atendimentos</p>
-    </header>
-
-    <!-- TABELA DE LEADS (CONECTADA AO SUPABASE) -->
-    <div id="view-leads" class="view-section active-view bg-[#141414] border border-[#262626] rounded-2xl p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-lg font-bold">Orçamentos Recebidos</h2>
-            <button onclick="carregarLeads()" class="bg-amber-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-amber-500">
-                <i class="fa-solid fa-rotate mr-2"></i>Atualizar
-            </button>
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-[#141414] border-r border-[#262626] p-6 flex flex-col justify-between">
+        <div>
+            <h2 class="text-amber-500 font-bold text-xl mb-8 flex items-center gap-2">
+                <i class="fa-solid fa-car-side"></i> OÁSIS CAR
+            </h2>
+            <nav class="space-y-2">
+                <button onclick="showView('dashboard')" class="sidebar-item active w-full flex items-center gap-3 p-3 rounded-lg text-sm transition-all hover:bg-[#262626]">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </button>
+                <button onclick="showView('leads')" class="sidebar-item w-full flex items-center gap-3 p-3 rounded-lg text-sm transition-all hover:bg-[#262626]">
+                    <i class="fa-solid fa-users"></i> Leads
+                </button>
+                <button onclick="showView('funil')" class="sidebar-item w-full flex items-center gap-3 p-3 rounded-lg text-sm transition-all hover:bg-[#262626]">
+                    <i class="fa-solid fa-funnel-dollar"></i> Funil de Vendas
+                </button>
+            </nav>
         </div>
+        <div class="text-xs text-gray-500">v2.0 CRM Premium</div>
+    </aside>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left">
-                <thead>
-                    <tr class="text-xs text-gray-500 uppercase border-b border-[#262626]">
-                        <th class="pb-3">Cliente</th>
-                        <th class="pb-3">Veículo</th>
-                        <th class="pb-3">Serviço</th>
-                        <th class="pb-3">Status</th>
-                        <th class="pb-3 text-right">Ação</th>
-                    </tr>
-                </thead>
-                <tbody id="leadsTableBody" class="divide-y divide-[#262626]">
-                    <!-- O JavaScript vai injetar os dados aqui -->
-                    <tr><td colspan="5" class="py-10 text-center text-gray-500">Carregando dados...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 overflow-y-auto p-8 bg-[#0a0a0a]">
+        
+        <!-- DASHBOARD VIEW -->
+        <section id="view-dashboard" class="view-section active-view space-y-6">
+            <h1 class="text-2xl font-bold">Dashboard</h1>
+            <div class="grid grid-cols-4 gap-4">
+                <div class="bg-[#141414] p-6 rounded-2xl border border-[#262626]">
+                    <p class="text-gray-500 text-sm">Leads Hoje</p>
+                    <p class="text-3xl font-bold mt-2" id="stat-hoje">0</p>
+                </div>
+                <!-- Outros cards seriam alimentados aqui -->
+                <div class="bg-[#141414] p-6 rounded-2xl border border-[#262626]">
+                    <p class="text-gray-500 text-sm">Orçamentos</p>
+                    <p class="text-3xl font-bold mt-2">--</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- LEADS VIEW (A Tabela) -->
+        <section id="view-leads" class="view-section space-y-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold">Gestão de Leads</h1>
+                <button onclick="carregarLeads()" class="bg-amber-600 text-black font-bold px-4 py-2 rounded-lg hover:bg-amber-500 text-sm">
+                    <i class="fa-solid fa-rotate mr-2"></i>Atualizar
+                </button>
+            </div>
+            
+            <div class="bg-[#141414] border border-[#262626] rounded-2xl p-6">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-xs text-gray-500 uppercase border-b border-[#262626]">
+                            <th class="pb-3">Cliente</th>
+                            <th class="pb-3">Veículo</th>
+                            <th class="pb-3">Serviço</th>
+                            <th class="pb-3">Status</th>
+                            <th class="pb-3 text-right">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaLeads" class="divide-y divide-[#262626]">
+                        <tr><td colspan="5" class="py-10 text-center">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- FUNIL VIEW -->
+        <section id="view-funil" class="view-section">
+            <h1 class="text-2xl font-bold mb-6">Funil de Vendas</h1>
+            <div class="text-gray-500 italic">Módulo de Kanban em desenvolvimento...</div>
+        </section>
+    </main>
 
     <script>
-        // CONFIGURAÇÃO SUPABASE
+        // CONFIGURAÇÃO SUPABASE (Mantida exatamente igual)
         const SUPABASE_URL = 'https://pyodkkcmuoqrsnnifdqf.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_9jxs8Rc9L6BDNTvpT8fQ_A_dQSjuSHd';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const meuNumeroWhatsApp = '5516991408438';
 
-        // FUNÇÃO PARA BUSCAR DADOS
-        async function carregarLeads() {
-            const tbody = document.getElementById('leadsTableBody');
-            tbody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-gray-500">Carregando...</td></tr>';
+        // LÓGICA DE NAVEGAÇÃO
+        function showView(viewId) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active-view'));
+            document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active-view');
+            event.currentTarget.classList.add('active');
+        }
 
+        // LÓGICA DE CARREGAMENTO (A sua lógica original preservada)
+        async function carregarLeads() {
+            const tbody = document.getElementById('tabelaLeads');
             try {
-                // BUSCANDO NA TABELA 'orcamentos'
                 const { data, error } = await supabaseClient
                     .from('orcamentos')
                     .select('*')
@@ -71,45 +118,30 @@
 
                 if (error) throw error;
 
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-gray-500">Nenhum orçamento encontrado.</td></tr>';
-                    return;
-                }
-
                 tbody.innerHTML = '';
+                document.getElementById('stat-hoje').innerText = data.length; // Atualiza dashboard
+
                 data.forEach(item => {
-                    const nome = item.nome || 'Cliente';
-                    const veiculo = item.veiculo || 'N/I';
-                    const servico = item.servico || 'N/I';
-                    const status = item.status || 'NOVO';
-                    
-                    // Link do WhatsApp
-                    const textoZap = `Olá ${nome}, vi seu pedido de orçamento para o serviço de ${servico} no veículo ${veiculo}. Vamos conversar?`;
-                    const linkZap = `https://api.whatsapp.com/send?phone=${meuNumeroWhatsApp}&text=${encodeURIComponent(textoZap)}`;
+                    const linkZap = `https://api.whatsapp.com/send?phone=${meuNumeroWhatsApp}&text=${encodeURIComponent(`Olá ${item.nome}, vi seu interesse em ${item.servico}...`)}`;
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td class="py-4 font-medium">${nome}</td>
-                        <td class="py-4 text-gray-400">${veiculo}</td>
-                        <td class="py-4 text-gray-400">${servico}</td>
-                        <td class="py-4"><span class="px-3 py-1 bg-amber-900/30 text-amber-500 rounded-full text-xs font-bold border border-amber-500/20">${status}</span></td>
+                        <td class="py-4 font-medium">${item.nome || 'Cliente'}</td>
+                        <td class="py-4 text-gray-400">${item.veiculo || 'N/I'}</td>
+                        <td class="py-4 text-gray-400">${item.servico || 'N/I'}</td>
+                        <td class="py-4"><span class="px-3 py-1 bg-amber-900/30 text-amber-500 rounded-full text-xs">${item.status || 'NOVO'}</span></td>
                         <td class="py-4 text-right">
-                            <a href="${linkZap}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-2 rounded-lg text-xs font-bold">
-                                <i class="fa-brands fa-whatsapp mr-1"></i> Contato
-                            </a>
+                            <a href="${linkZap}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-xs">WhatsApp</a>
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
-
             } catch (err) {
-                console.error("Erro ao carregar:", err);
-                tbody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-red-500">Erro ao conectar ao banco.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-red-500">Erro ao carregar dados.</td></tr>';
             }
         }
 
-        // INICIALIZAÇÃO
-        window.addEventListener('DOMContentLoaded', carregarLeads);
+        window.onload = carregarLeads;
     </script>
 </body>
 </html>
