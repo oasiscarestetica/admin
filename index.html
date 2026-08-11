@@ -56,7 +56,7 @@
         <!-- CONTEÚDO PRINCIPAL -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- TABELA DE LEADS RECENTES (Ocupa 2 colunas) -->
+            <!-- TABELA DE LEADS RECENTES -->
             <div class="lg:col-span-2 bg-[#141414] border border-[#262626] rounded-2xl p-6 shadow-xl flex flex-col">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-lg font-bold">Leads Recentes</h2>
@@ -109,14 +109,17 @@
 
     </div>
 
-    <!-- SCRIPT DE INTEGRAÇÃO COM SUPABASE -->
+    <!-- SCRIPT DO PAINEL ADMINISTRATIVO -->
     <script>
-        // 1. Configuração do Supabase
+        // Configuração do Supabase
         const SUPABASE_URL = 'https://pyodkkcmuoqsrsnnifdqf.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5b2Rra2NtdW9xcnNubmlmZHFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzMjY2MzEsImV4cCI6MjEwMTkwMjYzMX0.QSfkfTNraM9GAgzdFJ8fzXYcaj6MrzqlHodLzsJcIoA';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // 2. Função que busca os dados no Supabase e preenche a tabela
+        // Seu número de WhatsApp configurado
+        const meuNumeroWhatsApp = '5516991408438';
+
+        // Função que busca os dados no Supabase e preenche a tabela do painel
         async function carregarLeads() {
             const tabelaBody = document.getElementById('tabelaLeads');
             const contadorLeads = document.getElementById('contadorLeads');
@@ -140,20 +143,29 @@
                 }
 
                 data.forEach(item => {
+                    const nome = item.nome || 'Cliente';
+                    const veiculo = item.veiculo || 'Não informado';
+                    const servico = item.servico || 'Não informado';
+                    const status = item.status || 'NOVO';
+
+                    // Link rápido para responder o cliente no WhatsApp a partir do painel
+                    const textoZap = `Olá ${nome}, vi seu pedido de orçamento para o serviço de ${servico} no veículo ${veiculo} na Oásis Car Estética. Vamos conversar?`;
+                    const linkZap = `https://api.whatsapp.com/send?phone=${meuNumeroWhatsApp}&text=${encodeURIComponent(textoZap)}`;
+
                     const row = `
                         <tr class="hover:bg-[#1c1c1c]/50 transition-colors">
-                            <td class="py-3 font-medium">${item.nome || 'Não informado'}</td>
-                            <td class="py-3 text-brand-grayText">${item.veiculo || '-'}</td>
-                            <td class="py-3 text-brand-grayText">${item.servico || '-'}</td>
+                            <td class="py-3 font-medium">${nome}</td>
+                            <td class="py-3 text-brand-grayText">${veiculo}</td>
+                            <td class="py-3 text-brand-grayText">${servico}</td>
                             <td class="py-3">
                                 <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                                    ${item.status || 'NOVO'}
+                                    ${status}
                                 </span>
                             </td>
                             <td class="py-3 text-right">
-                                <button onclick="alert('Detalhes do lead: ${item.telefone || ''}')" class="bg-[#262626] hover:bg-neutral-800 text-xs px-3 py-1.5 rounded-lg transition-colors cursor-pointer">
-                                    Ver
-                                </button>
+                                <a href="${linkZap}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1 font-semibold">
+                                    <i class="fa-brands fa-whatsapp"></i> Contato
+                                </a>
                             </td>
                         </tr>
                     `;
@@ -166,7 +178,7 @@
             }
         }
 
-        // 3. Função da Calculadora de Orçamento
+        // Função da Calculadora de Orçamento
         function calcularOrcamento() {
             const servico = parseFloat(document.getElementById('valServico').value) || 0;
             const desconto = parseFloat(document.getElementById('valDesconto').value) || 0;
