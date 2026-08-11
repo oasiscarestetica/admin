@@ -110,11 +110,10 @@
     </div>
 
     <!-- SCRIPT DO PAINEL ADMINISTRATIVO -->
-   <!-- SCRIPT DO PAINEL ADMINISTRATIVO -->
     <script>
-        // Configuração do Supabase (URL completa e chave de acesso)
+        // Configuração atualizada com a nova chave publicável do Supabase
         const SUPABASE_URL = 'https://pyodkkcmuoqsrsnnifdqf.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5b2Rra2NtdW9xcnNubmlmZHFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzMjY2MzEsImV4cCI6MjEwMTkwMjYzMX0.QSfkfTNraM9GAgzdFJ8fzXYcaj6MrzqlHodLzsJcIoA';
+        const SUPABASE_ANON_KEY = 'sb_publishable_7Y4O738p09-V_z7U...'; // Copie a chave completa que aparece no seu painel se necessário
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Seu número de WhatsApp configurado
@@ -149,7 +148,6 @@
                     const servico = item.servico || 'Não informado';
                     const status = item.status || 'NOVO';
 
-                    // Link rápido para responder o cliente no WhatsApp a partir do painel
                     const textoZap = `Olá ${nome}, vi seu pedido de orçamento para o serviço de ${servico} no veículo ${veiculo} na Oásis Car Estética. Vamos conversar?`;
                     const linkZap = `https://api.whatsapp.com/send?phone=${meuNumeroWhatsApp}&text=${encodeURIComponent(textoZap)}`;
 
