@@ -621,174 +621,173 @@
     </main>
 
     <script>
-        // ==========================================
-        // CONFIGURAÇÃO DO SUPABASE
-        // ==========================================
-        // Substitua abaixo com as suas credenciais reais do seu painel Supabase:
- // Configuração correta do Supabase com a URL completa
+   // ==========================================
+// CONFIGURAÇÃO DO SUPABASE
+// ==========================================
 const SUPABASE_URL = 'https://pyodkkcmuoqrsnnifdqf.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_9jxs8Rc9L6BDNTvpT8fQ_A_dQSjuSHd';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let supabaseClient = null;
-        try {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch(e) {
-            console.error("Erro ao inicializar Supabase:", e);
-        }
+let supabaseClient = null;
+try {
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch(e) {
+    console.error("Erro ao inicializar Supabase:", e);
+}
 
-        let cacheLeads = [];
+let cacheLeads = [];
 
-        async function carregarLeadsSupabase() {
-            if(!supabaseClient || SUPABASE_URL.includes('SUA-URL')) {
-                // Dados de exemplo caso as chaves ainda não tenham sido inseridas
-                cacheLeads = [
-                    {
-                        id: 1,
-                        client_name: 'GUSTAVO HENRIQUE',
-                        phone: '(16) 99140-8438',
-                        vehicle: 'PORSCHE (2013) - BRANCO',
-                        service: 'HIGIENIZAÇÃO INTERNA',
-                        temperature: 'MORNO',
-                        score: 50,
-                        status: 'NOVO',
-                        estimated_value: 0
-                    },
-                    {
-                        id: 2,
-                        client_name: 'JOSE HENRIQUE',
-                        phone: '(16) 99140-8438',
-                        vehicle: 'HONDA (2020) - PRETO',
-                        service: 'VITRIFICAÇÃO',
-                        temperature: 'MORNO',
-                        score: 50,
-                        status: 'NOVO',
-                        estimated_value: 0
-                    }
-                ];
-                renderizarTabela(cacheLeads);
-                return;
+async function carregarLeadsSupabase() {
+    if(!supabaseClient || SUPABASE_URL.includes('SUA-URL')) {
+        // Dados de exemplo caso as chaves ainda não tenham sido inseridas
+        cacheLeads = [
+            {
+                id: 1,
+                client_name: 'GUSTAVO HENRIQUE',
+                phone: '(16) 99140-8438',
+                vehicle: 'PORSCHE (2013) - BRANCO',
+                service: 'HIGIENIZAÇÃO INTERNA',
+                temperature: 'MORNO',
+                score: 50,
+                status: 'NOVO',
+                estimated_value: 0
+            },
+            {
+                id: 2,
+                client_name: 'JOSE HENRIQUE',
+                phone: '(16) 99140-8438',
+                vehicle: 'HONDA (2020) - PRETO',
+                service: 'VITRIFICAÇÃO',
+                temperature: 'MORNO',
+                score: 50,
+                status: 'NOVO',
+                estimated_value: 0
             }
+        ];
+        renderizarTabela(cacheLeads);
+        return;
+    }
 
-            try {
-                const { data, error } = await supabaseClient
-                    .from('leads')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+    try {
+        const { data, error } = await supabaseClient
+            .from('leads')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-                if (error) throw error;
-                cacheLeads = data || [];
-                renderizarTabela(cacheLeads);
-            } catch (err) {
-                console.error("Erro ao carregar leads do Supabase:", err);
-            }
+        if (error) throw error;
+        cacheLeads = data || [];
+        renderizarTabela(cacheLeads);
+    } catch (err) {
+        console.error("Erro ao carregar leads do Supabase:", err);
+    }
+}
+
+function renderizarTabela(leads) {
+    const tbody = document.getElementById('leadsTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (!leads || leads.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #71717a; padding: 30px;">Nenhum lead encontrado.</td></tr>`;
+        return;
+    }
+
+    leads.forEach(lead => {
+        const tr = document.createElement('tr');
+        const cleanPhone = lead.phone ? lead.phone.replace(/\D/g, '') : '';
+        
+        tr.innerHTML = `
+            <td>
+                <span class="client-name">${lead.client_name || 'CLIENTE'}</span>
+                <span class="client-phone"><i class="fa-brands fa-whatsapp"></i> ${lead.phone || ''}</span>
+            </td>
+            <td>${lead.vehicle || 'N/I'}</td>
+            <td style="font-weight: 500;">${lead.service || 'ESTÉTICA AUTOMOTIVA'}</td>
+            <td>
+                <div class="temperature-badge">${lead.temperature || 'MORNO'}</div>
+                <div style="font-size: 11px; color: #71717a; margin-top: 2px;">SCORE: ${lead.score || 50}</div>
+            </td>
+            <td><span class="status-tag">${lead.status || 'NOVO'}</span></td>
+            <td style="font-weight: 600; color: #10b981;">R$ ${(lead.estimated_value || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+            <td>
+                <div class="actions-group">
+                    <a href="https://wa.me/55${cleanPhone}" target="_blank" class="action-icon whatsapp" title="Abrir WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                    <a href="#" class="action-icon view" title="Visualizar Detalhes"><i class="fa-regular fa-eye"></i></a>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// ==========================================
+// NAVEGAÇÃO ENTRE ABAS DA SIDEBAR
+// ==========================================
+const menuItems = document.querySelectorAll('.menu-item');
+const viewSections = document.querySelectorAll('.view-section');
+const pageTitle = document.getElementById('page-title');
+const pageSubtitle = document.getElementById('page-subtitle');
+
+const metadataPages = {
+    'dashboard': { title: 'Dashboard', subtitle: 'Visão geral do desempenho e métricas - Ribeirão Preto' },
+    'leads': { title: 'Leads & CRM', subtitle: 'Gerenciamento inteligente de leads e conversão - Ribeirão Preto' },
+    'funil': { title: 'Funil de Vendas', subtitle: 'Acompanhamento das etapas do pipeline de atendimento' },
+    'followups': { title: 'Follow-ups', subtitle: 'Contatos pendentes e retornos agendados com clientes' },
+    'agenda': { title: 'Agenda', subtitle: 'Agendamentos e horários na Oásis Car Estética' },
+    'clientes': { title: 'Clientes', subtitle: 'Histórico de clientes cadastrados e veículos' },
+    'relatorios': { title: 'Relatórios', subtitle: 'Análise financeira e conversão de vendas' },
+    'config': { title: 'Configurações', subtitle: 'Ajustes do sistema, integrações e Supabase' }
+};
+
+menuItems.forEach(item => {
+    item.addEventListener('click', () => {
+        const viewName = item.getAttribute('data-view');
+        
+        menuItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+
+        viewSections.forEach(sec => sec.classList.remove('active-view'));
+        const targetView = document.getElementById('view-' + viewName);
+        if (targetView) targetView.classList.add('active-view');
+
+        if(metadataPages[viewName] && pageTitle && pageSubtitle) {
+            pageTitle.textContent = metadataPages[viewName].title;
+            pageSubtitle.textContent = metadataPages[viewName].subtitle;
         }
+    });
+});
 
-        function renderizarTabela(leads) {
-            const tbody = document.getElementById('leadsTableBody');
-            tbody.innerHTML = '';
+// Filtragem em tempo real
+const searchInput = document.getElementById('searchInput');
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        const termo = e.target.value.toLowerCase();
+        const filtrados = cacheLeads.filter(l => 
+            (l.client_name && l.client_name.toLowerCase().includes(termo)) ||
+            (l.phone && l.phone.toLowerCase().includes(termo)) ||
+            (l.vehicle && l.vehicle.toLowerCase().includes(termo))
+        );
+        renderizarTabela(filtrados);
+    });
+}
 
-            if (!leads || leads.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #71717a; padding: 30px;">Nenhum lead encontrado.</td></tr>`;
-                return;
-            }
+function abrirModalNovoLead() {
+    alert('Funcionalidade de cadastro manual de lead ativada.');
+}
 
-            leads.forEach(lead => {
-                const tr = document.createElement('tr');
-                const cleanPhone = lead.phone ? lead.phone.replace(/\D/g, '') : '';
-                
-                tr.innerHTML = `
-                    <td>
-                        <span class="client-name">${lead.client_name || 'CLIENTE'}</span>
-                        <span class="client-phone"><i class="fa-brands fa-whatsapp"></i> ${lead.phone || ''}</span>
-                    </td>
-                    <td>${lead.vehicle || 'N/I'}</td>
-                    <td style="font-weight: 500;">${lead.service || 'ESTÉTICA AUTOMOTIVA'}</td>
-                    <td>
-                        <div class="temperature-badge">${lead.temperature || 'MORNO'}</div>
-                        <div style="font-size: 11px; color: #71717a; margin-top: 2px;">SCORE: ${lead.score || 50}</div>
-                    </td>
-                    <td><span class="status-tag">${lead.status || 'NOVO'}</span></td>
-                    <td style="font-weight: 600; color: #10b981;">R$ ${(lead.estimated_value || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                    <td>
-                        <div class="actions-group">
-                            <a href="https://wa.me/55${cleanPhone}" target="_blank" class="action-icon whatsapp" title="Abrir WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-                            <a href="#" class="action-icon view" title="Visualizar Detalhes"><i class="fa-regular fa-eye"></i></a>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+// Inicialização ao carregar a página
+window.addEventListener('DOMContentLoaded', () => {
+    carregarLeadsSupabase();
 
-        // ==========================================
-        // NAVEGAÇÃO ENTRE ABAS DA SIDEBAR
-        // ==========================================
-        const menuItems = document.querySelectorAll('.menu-item');
-        const viewSections = document.querySelectorAll('.view-section');
-        const pageTitle = document.getElementById('page-title');
-        const pageSubtitle = document.getElementById('page-subtitle');
-
-        const metadataPages = {
-            'dashboard': { title: 'Dashboard', subtitle: 'Visão geral do desempenho e métricas - Ribeirão Preto' },
-            'leads': { title: 'Leads & CRM', subtitle: 'Gerenciamento inteligente de leads e conversão - Ribeirão Preto' },
-            'funil': { title: 'Funil de Vendas', subtitle: 'Acompanhamento das etapas do pipeline de atendimento' },
-            'followups': { title: 'Follow-ups', subtitle: 'Contatos pendentes e retornos agendados com clientes' },
-            'agenda': { title: 'Agenda', subtitle: 'Agendamentos e horários na Oásis Car Estética' },
-            'clientes': { title: 'Clientes', subtitle: 'Histórico de clientes cadastrados e veículos' },
-            'relatorios': { title: 'Relatórios', subtitle: 'Análise financeira e conversão de vendas' },
-            'config': { title: 'Configurações', subtitle: 'Ajustes do sistema, integrações e Supabase' }
-        };
-
-        menuItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const viewName = item.getAttribute('data-view');
-                
-                // Ativar classe visual no menu
-                menuItems.forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-
-                // Trocar seção visível
-                viewSections.forEach(sec => sec.classList.remove('active-view'));
-                document.getElementById('view-' + viewName).classList.add('active-view');
-
-                // Atualizar cabeçalho
-                if(metadataPages[viewName]) {
-                    pageTitle.textContent = metadataPages[viewName].title;
-                    pageSubtitle.textContent = metadataPages[viewName].subtitle;
-                }
-            });
-        });
-
-        // Filtragem em tempo real
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const termo = e.target.value.toLowerCase();
-            const filtrados = cacheLeads.filter(l => 
-                (l.client_name && l.client_name.toLowerCase().includes(termo)) ||
-                (l.phone && l.phone.toLowerCase().includes(termo)) ||
-                (l.vehicle && l.vehicle.toLowerCase().includes(termo))
-            );
-            renderizarTabela(filtrados);
-        });
-
-        function abrirModalNovoLead() {
-            alert('Funcionalidade de cadastro manual de lead ativada.');
-        }
-
-        // Inicialização ao carregar a página
-        window.addEventListener('DOMContentLoaded', () => {
-            carregarLeadsSupabase();
-
-            // Configurar Realtime do Supabase caso esteja conectado
-            if(supabaseClient && !SUPABASE_URL.includes('SUA-URL')) {
-                supabaseClient
-                    .channel('public:leads')
-                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, payload => {
-                        carregarLeadsSupabase();
-                    })
-                    .subscribe();
-            }
-        });
+    // Configurar Realtime do Supabase caso esteja conectado
+    if(supabaseClient && !SUPABASE_URL.includes('SUA-URL')) {
+        supabaseClient
+            .channel('public:leads')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, payload => {
+                carregarLeadsSupabase();
+            })
+            .subscribe();
+    }
+});
     </script>
 </body>
 </html>
