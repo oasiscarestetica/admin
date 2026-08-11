@@ -1,204 +1,115 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="scroll-smooth">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Administrativo | Oásis Car Estética</title>
-    <!-- Supabase JS -->
+    <title>Painel Oásis Car Estética</title>
+    <!-- Supabase e Tailwind -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            dark: '#0a0a0a',
-                            card: '#141414',
-                            border: '#262626',
-                            accent: '#f59e0b',
-                            red: '#dc2626',
-                            grayText: '#a3a3a3'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; color: #ffffff; }
+        body { background-color: #0a0a0a; color: white; font-family: sans-serif; }
+        .view-section { display: none; }
+        .active-view { display: block; }
     </style>
 </head>
-<body class="bg-[#0a0a0a] text-white antialiased min-h-screen p-4 sm:p-8">
+<body class="p-6">
 
-    <div class="max-w-7xl mx-auto space-y-6">
-        
-        <!-- HEADER DO PAINEL -->
-        <header class="bg-[#141414] border border-[#262626] rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
-            <div>
-                <h1 class="text-2xl font-extrabold tracking-tight text-amber-500">Oásis Car Estética</h1>
-                <p class="text-xs text-brand-grayText mt-1">Painel de Gestão de Leads e Orçamentos - Ribeirão Preto</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-800/60 text-emerald-400 text-xs font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistema Online
-                </span>
-                <button onclick="carregarLeads()" class="bg-[#262626] hover:bg-neutral-800 text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex items-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-rotate"></i> Atualizar
-                </button>
-            </div>
-        </header>
+    <!-- CABEÇALHO -->
+    <header class="mb-8">
+        <h1 id="page-title" class="text-2xl font-bold text-amber-500">Leads & CRM</h1>
+        <p id="page-subtitle" class="text-sm text-gray-400">Gerenciamento de orçamentos e atendimentos</p>
+    </header>
 
-        <!-- CONTEÚDO PRINCIPAL -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- TABELA DE LEADS RECENTES -->
-            <div class="lg:col-span-2 bg-[#141414] border border-[#262626] rounded-2xl p-6 shadow-xl flex flex-col">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-lg font-bold">Leads Recentes</h2>
-                    <span id="contadorLeads" class="text-xs bg-[#262626] px-2.5 py-1 rounded-full text-brand-grayText">0 leads</span>
-                </div>
-
-                <div class="overflow-x-auto flex-1">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-[#262626] text-xs text-brand-grayText uppercase tracking-wider">
-                                <th class="pb-3 font-semibold">Cliente</th>
-                                <th class="pb-3 font-semibold">Veículo</th>
-                                <th class="pb-3 font-semibold">Serviço</th>
-                                <th class="pb-3 font-semibold">Status</th>
-                                <th class="pb-3 font-semibold text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaLeads" class="divide-y divide-[#262626]/50 text-sm">
-                            <tr>
-                                <td colspan="5" class="py-8 text-center text-brand-grayText">Carregando leads...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- CALCULADORA DE ORÇAMENTO -->
-            <div class="bg-[#141414] border border-[#262626] rounded-2xl p-6 shadow-xl space-y-4">
-                <h2 class="text-lg font-bold mb-4">Calculadora de Orçamento</h2>
-                
-                <div>
-                    <label class="block text-xs text-brand-grayText mb-1">Valor do Serviço (R$)</label>
-                    <input type="number" id="valServico" placeholder="0,00" oninput="calcularOrcamento()"
-                        class="w-full bg-[#1c1c1c] border border-[#262626] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
-                </div>
-
-                <div>
-                    <label class="block text-xs text-brand-grayText mb-1">Desconto (R$)</label>
-                    <input type="number" id="valDesconto" placeholder="0,00" oninput="calcularOrcamento()"
-                        class="w-full bg-[#1c1c1c] border border-[#262626] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
-                </div>
-
-                <div class="pt-4 border-t border-[#262626]">
-                    <span class="block text-xs text-brand-grayText mb-1">Valor Final Sugerido</span>
-                    <div id="valorFinal" class="text-3xl font-extrabold text-amber-500">R$ 0,00</div>
-                </div>
-            </div>
-
+    <!-- TABELA DE LEADS (CONECTADA AO SUPABASE) -->
+    <div id="view-leads" class="view-section active-view bg-[#141414] border border-[#262626] rounded-2xl p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-lg font-bold">Orçamentos Recebidos</h2>
+            <button onclick="carregarLeads()" class="bg-amber-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-amber-500">
+                <i class="fa-solid fa-rotate mr-2"></i>Atualizar
+            </button>
         </div>
 
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="text-xs text-gray-500 uppercase border-b border-[#262626]">
+                        <th class="pb-3">Cliente</th>
+                        <th class="pb-3">Veículo</th>
+                        <th class="pb-3">Serviço</th>
+                        <th class="pb-3">Status</th>
+                        <th class="pb-3 text-right">Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="leadsTableBody" class="divide-y divide-[#262626]">
+                    <!-- O JavaScript vai injetar os dados aqui -->
+                    <tr><td colspan="5" class="py-10 text-center text-gray-500">Carregando dados...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
         // CONFIGURAÇÃO SUPABASE
         const SUPABASE_URL = 'https://pyodkkcmuoqrsnnifdqf.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_9jxs8Rc9L6BDNTvpT8fQ_A_dQSjuSHd';
-        
-        // Inicializa o cliente apenas se o supabase estiver carregado
-        let supabaseClient;
-        try {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch (e) {
-            console.error("Erro ao iniciar Supabase:", e);
-        }
-
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const meuNumeroWhatsApp = '5516991408438';
 
+        // FUNÇÃO PARA BUSCAR DADOS
         async function carregarLeads() {
-            const tabelaBody = document.getElementById('tabelaLeads');
-            const contadorLeads = document.getElementById('contadorLeads');
-            
-            if (!supabaseClient) {
-                tabelaBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-red-500">Erro: Supabase não carregou.</td></tr>';
-                return;
-            }
-
-            tabelaBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-brand-grayText">Carregando dados...</td></tr>';
+            const tbody = document.getElementById('leadsTableBody');
+            tbody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-gray-500">Carregando...</td></tr>';
 
             try {
+                // BUSCANDO NA TABELA 'orcamentos'
                 const { data, error } = await supabaseClient
-                    .from('orcamentos') // Mantido a tabela 'orcamentos' como você pediu
+                    .from('orcamentos')
                     .select('*')
                     .order('created_at', { ascending: false });
 
-                if (error) {
-                    console.error("Erro na consulta:", error);
-                    tabelaBody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-red-500">Erro na tabela: ${error.message}</td></tr>`;
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-gray-500">Nenhum orçamento encontrado.</td></tr>';
                     return;
                 }
 
-                tabelaBody.innerHTML = '';
-                contadorLeads.innerText = `${data.length} lead${data.length === 1 ? '' : 's'}`;
-
-                if (data.length === 0) {
-                    tabelaBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-brand-grayText">Nenhum orçamento pendente.</td></tr>';
-                    return;
-                }
-
+                tbody.innerHTML = '';
                 data.forEach(item => {
                     const nome = item.nome || 'Cliente';
-                    const veiculo = item.veiculo || 'Não informado';
-                    const servico = item.servico || 'Não informado';
+                    const veiculo = item.veiculo || 'N/I';
+                    const servico = item.servico || 'N/I';
                     const status = item.status || 'NOVO';
-
-                    const textoZap = `Olá ${nome}, vi seu pedido de orçamento para o serviço de ${servico} no veículo ${veiculo} na Oásis Car Estética. Vamos conversar?`;
+                    
+                    // Link do WhatsApp
+                    const textoZap = `Olá ${nome}, vi seu pedido de orçamento para o serviço de ${servico} no veículo ${veiculo}. Vamos conversar?`;
                     const linkZap = `https://api.whatsapp.com/send?phone=${meuNumeroWhatsApp}&text=${encodeURIComponent(textoZap)}`;
 
-                    const row = `
-                        <tr class="hover:bg-[#1c1c1c]/50 transition-colors">
-                            <td class="py-3 font-medium">${nome}</td>
-                            <td class="py-3 text-brand-grayText">${veiculo}</td>
-                            <td class="py-3 text-brand-grayText">${servico}</td>
-                            <td class="py-3">
-                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                                    ${status}
-                                </span>
-                            </td>
-                            <td class="py-3 text-right">
-                                <a href="${linkZap}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1 font-semibold">
-                                    <i class="fa-brands fa-whatsapp"></i> Contato
-                                </a>
-                            </td>
-                        </tr>
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="py-4 font-medium">${nome}</td>
+                        <td class="py-4 text-gray-400">${veiculo}</td>
+                        <td class="py-4 text-gray-400">${servico}</td>
+                        <td class="py-4"><span class="px-3 py-1 bg-amber-900/30 text-amber-500 rounded-full text-xs font-bold border border-amber-500/20">${status}</span></td>
+                        <td class="py-4 text-right">
+                            <a href="${linkZap}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-2 rounded-lg text-xs font-bold">
+                                <i class="fa-brands fa-whatsapp mr-1"></i> Contato
+                            </a>
+                        </td>
                     `;
-                    tabelaBody.innerHTML += row;
+                    tbody.appendChild(tr);
                 });
+
             } catch (err) {
-                console.error('Erro:', err.message);
-                tabelaBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-red-500">Erro inesperado ao carregar dados.</td></tr>';
+                console.error("Erro ao carregar:", err);
+                tbody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-red-500">Erro ao conectar ao banco.</td></tr>';
             }
         }
 
-        function calcularOrcamento() {
-            const servico = parseFloat(document.getElementById('valServico').value) || 0;
-            const desconto = parseFloat(document.getElementById('valDesconto').value) || 0;
-            let final = servico - desconto;
-            if (final < 0) final = 0;
-            document.getElementById('valorFinal').innerText = 'R$ ' + final.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        // Carrega ao iniciar
-        carregarLeads();
+        // INICIALIZAÇÃO
+        window.addEventListener('DOMContentLoaded', carregarLeads);
     </script>
 </body>
 </html>
