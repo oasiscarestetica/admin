@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oásis Car Estética - CRM & Leads</title>
-    <!-- Fonte Inter para máxima nitidez e profissionalismo -->
+    <!-- Fonte Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         * {
@@ -94,6 +96,7 @@
             font-weight: 500;
             border-radius: 8px;
             transition: all 0.2s ease;
+            cursor: pointer;
         }
 
         .menu-item:hover {
@@ -232,9 +235,17 @@
             color: #f59e0b;
         }
 
-        /* CONTAINER BODY */
+        /* CONTAINER BODY & SECTIONS */
         .content-body {
             padding: 32px;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active-view {
+            display: block;
         }
 
         /* FILTERS & SEARCH */
@@ -427,6 +438,26 @@
             border-color: #f59e0b;
             color: #f59e0b;
         }
+
+        /* CARD DE CONTEÚDO GENÉRICO PARA OUTRAS ABAS */
+        .generic-card {
+            background: #121215;
+            border: 1px solid #1f1f23;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .generic-card h3 {
+            font-size: 20px;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .generic-card p {
+            color: #9ca3af;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -443,14 +474,14 @@
             </div>
             
             <div class="menu-list">
-                <a href="#" class="menu-item"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
-                <a href="#" class="menu-item active"><i class="fa-solid fa-users-gear"></i> Leads & CRM</a>
-                <a href="#" class="menu-item"><i class="fa-solid fa-filter"></i> Funil de Vendas</a>
-                <a href="#" class="menu-item"><i class="fa-solid fa-clock-rotate-left"></i> Follow-ups <span class="badge-count">0</span></a>
-                <a href="#" class="menu-item"><i class="fa-solid fa-calendar-days"></i> Agenda</a>
-                <a href="#" class="menu-item"><i class="fa-solid fa-user-group"></i> Clientes</a>
-                <a href="#" class="menu-item"><i class="fa-solid fa-chart-line"></i> Relatórios</a>
-                <a href="#" class="menu-item"><i class="fa-solid fa-gear"></i> Configurações</a>
+                <a class="menu-item" data-view="dashboard"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+                <a class="menu-item active" data-view="leads"><i class="fa-solid fa-users-gear"></i> Leads & CRM</a>
+                <a class="menu-item" data-view="funil"><i class="fa-solid fa-filter"></i> Funil de Vendas</a>
+                <a class="menu-item" data-view="followups"><i class="fa-solid fa-clock-rotate-left"></i> Follow-ups <span class="badge-count" id="badge-followup">0</span></a>
+                <a class="menu-item" data-view="agenda"><i class="fa-solid fa-calendar-days"></i> Agenda</a>
+                <a class="menu-item" data-view="clientes"><i class="fa-solid fa-user-group"></i> Clientes</a>
+                <a class="menu-item" data-view="relatorios"><i class="fa-solid fa-chart-line"></i> Relatórios</a>
+                <a class="menu-item" data-view="config"><i class="fa-solid fa-gear"></i> Configurações</a>
             </div>
         </div>
 
@@ -467,104 +498,295 @@
     <main>
         <header class="top-header">
             <div class="header-title">
-                <h2>Leads & CRM</h2>
-                <p>Gerenciamento inteligente de leads e conversão - Ribeirão Preto</p>
+                <h2 id="page-title">Leads & CRM</h2>
+                <p id="page-subtitle">Gerenciamento inteligente de leads e conversão - Ribeirão Preto</p>
             </div>
             <div class="header-actions">
                 <div class="status-badge">Sistema Online</div>
-                <button class="icon-btn" title="Atualizar dados"><i class="fa-solid fa-rotate"></i></button>
+                <button class="icon-btn" onclick="carregarLeadsSupabase()" title="Atualizar dados"><i class="fa-solid fa-rotate"></i></button>
                 <button class="icon-btn" title="Notificações"><i class="fa-regular fa-bell"></i></button>
             </div>
         </header>
 
         <div class="content-body">
-            <!-- BARRA DE FILTROS E BUSCA -->
-            <div class="filters-container">
-                <div class="search-box">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" placeholder="PESQUISAR CLIENTE, TELEFONE OU VEÍCULO...">
+            
+            <!-- VIEW: LEADS & CRM -->
+            <div id="view-leads" class="view-section active-view">
+                <div class="filters-container">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="searchInput" placeholder="PESQUISAR CLIENTE, TELEFONE OU VEÍCULO...">
+                    </div>
+
+                    <select class="filter-select" id="statusFilter">
+                        <option value="">TODOS OS STATUS</option>
+                        <option value="NOVO">Novo</option>
+                        <option value="EM_CONTATO">Em Contato</option>
+                        <option value="AGENDADO">Agendado</option>
+                        <option value="CONCLUIDO">Concluído</option>
+                    </select>
+
+                    <select class="filter-select" id="tempFilter">
+                        <option value="">TODAS TEMPERATURAS</option>
+                        <option value="QUENTE">Quente</option>
+                        <option value="MORNO">Morno</option>
+                        <option value="FRIO">Frio</option>
+                    </select>
+
+                    <button class="btn-primary" onclick="abrirModalNovoLead()">
+                        <i class="fa-solid fa-plus"></i> NOVO LEAD
+                    </button>
                 </div>
 
-                <select class="filter-select">
-                    <option>TODOS OS STATUS</option>
-                    <option>Novo</option>
-                    <option>Em Contato</option>
-                    <option>Agendado</option>
-                    <option>Concluído</option>
-                </select>
-
-                <select class="filter-select">
-                    <option>TODAS TEMPERATURAS</option>
-                    <option>Quente</option>
-                    <option>Morno</option>
-                    <option>Frio</option>
-                </select>
-
-                <button class="btn-primary">
-                    <i class="fa-solid fa-plus"></i> NOVO LEAD
-                </button>
+                <div class="table-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Cliente / Contato</th>
+                                <th>Veículo</th>
+                                <th>Serviço</th>
+                                <th>Temperatura / Score</th>
+                                <th>Status</th>
+                                <th>Valor Est.</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leadsTableBody">
+                            <!-- Inserido dinamicamente pelo Supabase -->
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: #71717a; padding: 30px;">Carregando leads do Supabase...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <!-- TABELA DE LEADS -->
-            <div class="table-card">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Cliente / Contato</th>
-                            <th>Veículo</th>
-                            <th>Serviço</th>
-                            <th>Temperatura / Score</th>
-                            <th>Status</th>
-                            <th>Valor Est.</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <span class="client-name">GUSTAVO HENRIQUE</span>
-                                <span class="client-phone"><i class="fa-brands fa-whatsapp"></i> (16) 99140-8438</span>
-                            </td>
-                            <td>PORSCHE (2013) - BRANCO</td>
-                            <td style="font-weight: 500;">HIGIENIZAÇÃO INTERNA</td>
-                            <td>
-                                <div class="temperature-badge">MORNO</div>
-                                <div style="font-size: 11px; color: #71717a; margin-top: 2px;">SCORE: 50</div>
-                            </td>
-                            <td><span class="status-tag">NOVO</span></td>
-                            <td style="font-weight: 600; color: #10b981;">R$ 0,00</td>
-                            <td>
-                                <div class="actions-group">
-                                    <a href="https://wa.me/5516991408438" target="_blank" class="action-icon whatsapp" title="Abrir WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-                                    <a href="#" class="action-icon view" title="Visualizar Detalhes"><i class="fa-regular fa-eye"></i></a>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="client-name">JOSE HENRIQUE</span>
-                                <span class="client-phone"><i class="fa-brands fa-whatsapp"></i> (16) 99140-8438</span>
-                            </td>
-                            <td>HONDA (2020) - PRETO</td>
-                            <td style="font-weight: 500;">VITRIFICAÇÃO</td>
-                            <td>
-                                <div class="temperature-badge">MORNO</div>
-                                <div style="font-size: 11px; color: #71717a; margin-top: 2px;">SCORE: 50</div>
-                            </td>
-                            <td><span class="status-tag">NOVO</span></td>
-                            <td style="font-weight: 600; color: #10b981;">R$ 0,00</td>
-                            <td>
-                                <div class="actions-group">
-                                    <a href="https://wa.me/5516991408438" target="_blank" class="action-icon whatsapp" title="Abrir WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-                                    <a href="#" class="action-icon view" title="Visualizar Detalhes"><i class="fa-regular fa-eye"></i></a>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- VIEW: DASHBOARD -->
+            <div id="view-dashboard" class="view-section">
+                <div class="generic-card">
+                    <h3>Dashboard Geral</h3>
+                    <p>Métricas de conversão, faturamento e atendimento em tempo real para Ribeirão Preto.</p>
+                </div>
             </div>
+
+            <!-- VIEW: FUNIL DE VENDAS -->
+            <div id="view-funil" class="view-section">
+                <div class="generic-card">
+                    <h3>Funil de Vendas Kanban</h3>
+                    <p>Gerencie o avanço dos clientes entre Prospecção, Orçamento Enviado e Fechamento.</p>
+                </div>
+            </div>
+
+            <!-- VIEW: FOLLOW-UPS -->
+            <div id="view-followups" class="view-section">
+                <div class="generic-card">
+                    <h3>Central de Follow-ups</h3>
+                    <p>Lista de clientes que aguardam retorno para fechamento de serviços estéticos.</p>
+                </div>
+            </div>
+
+            <!-- VIEW: AGENDA -->
+            <div id="view-agenda" class="view-section">
+                <div class="generic-card">
+                    <h3>Agenda de Atendimentos</h3>
+                    <p>Controle diário e semanal dos veículos agendados na Oásis Car Estética.</p>
+                </div>
+            </div>
+
+            <!-- VIEW: CLIENTES -->
+            <div id="view-clientes" class="view-section">
+                <div class="generic-card">
+                    <h3>Base de Clientes</h3>
+                    <p>Histórico completo de clientes cadastrados, carros e serviços realizados.</p>
+                </div>
+            </div>
+
+            <!-- VIEW: RELATÓRIOS -->
+            <div id="view-relatorios" class="view-section">
+                <div class="generic-card">
+                    <h3>Relatórios Financeiros</h3>
+                    <p>Faturamento, ticket médio e serviços mais procurados na região.</p>
+                </div>
+            </div>
+
+            <!-- VIEW: CONFIGURAÇÕES -->
+            <div id="view-config" class="view-section">
+                <div class="generic-card">
+                    <h3>Configurações do Sistema</h3>
+                    <p>Credenciais do Supabase, parâmetros de WhatsApp e dados da empresa.</p>
+                </div>
+            </div>
+
         </div>
     </main>
 
+    <script>
+        // ==========================================
+        // CONFIGURAÇÃO DO SUPABASE
+        // ==========================================
+        // Substitua abaixo com as suas credenciais reais do seu painel Supabase:
+        const SUPABASE_URL = 'https://pyodkkcmuoqrsnnifdqf.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_9jxs8Rc9L6BDNTvpT8fQ_A_dQSjuSHd';
+
+        let supabaseClient = null;
+        try {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch(e) {
+            console.error("Erro ao inicializar Supabase:", e);
+        }
+
+        let cacheLeads = [];
+
+        async function carregarLeadsSupabase() {
+            if(!supabaseClient || SUPABASE_URL.includes('SUA-URL')) {
+                // Dados de exemplo caso as chaves ainda não tenham sido inseridas
+                cacheLeads = [
+                    {
+                        id: 1,
+                        client_name: 'GUSTAVO HENRIQUE',
+                        phone: '(16) 99140-8438',
+                        vehicle: 'PORSCHE (2013) - BRANCO',
+                        service: 'HIGIENIZAÇÃO INTERNA',
+                        temperature: 'MORNO',
+                        score: 50,
+                        status: 'NOVO',
+                        estimated_value: 0
+                    },
+                    {
+                        id: 2,
+                        client_name: 'JOSE HENRIQUE',
+                        phone: '(16) 99140-8438',
+                        vehicle: 'HONDA (2020) - PRETO',
+                        service: 'VITRIFICAÇÃO',
+                        temperature: 'MORNO',
+                        score: 50,
+                        status: 'NOVO',
+                        estimated_value: 0
+                    }
+                ];
+                renderizarTabela(cacheLeads);
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('leads')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                cacheLeads = data || [];
+                renderizarTabela(cacheLeads);
+            } catch (err) {
+                console.error("Erro ao carregar leads do Supabase:", err);
+            }
+        }
+
+        function renderizarTabela(leads) {
+            const tbody = document.getElementById('leadsTableBody');
+            tbody.innerHTML = '';
+
+            if (!leads || leads.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #71717a; padding: 30px;">Nenhum lead encontrado.</td></tr>`;
+                return;
+            }
+
+            leads.forEach(lead => {
+                const tr = document.createElement('tr');
+                const cleanPhone = lead.phone ? lead.phone.replace(/\D/g, '') : '';
+                
+                tr.innerHTML = `
+                    <td>
+                        <span class="client-name">${lead.client_name || 'CLIENTE'}</span>
+                        <span class="client-phone"><i class="fa-brands fa-whatsapp"></i> ${lead.phone || ''}</span>
+                    </td>
+                    <td>${lead.vehicle || 'N/I'}</td>
+                    <td style="font-weight: 500;">${lead.service || 'ESTÉTICA AUTOMOTIVA'}</td>
+                    <td>
+                        <div class="temperature-badge">${lead.temperature || 'MORNO'}</div>
+                        <div style="font-size: 11px; color: #71717a; margin-top: 2px;">SCORE: ${lead.score || 50}</div>
+                    </td>
+                    <td><span class="status-tag">${lead.status || 'NOVO'}</span></td>
+                    <td style="font-weight: 600; color: #10b981;">R$ ${(lead.estimated_value || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>
+                        <div class="actions-group">
+                            <a href="https://wa.me/55${cleanPhone}" target="_blank" class="action-icon whatsapp" title="Abrir WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                            <a href="#" class="action-icon view" title="Visualizar Detalhes"><i class="fa-regular fa-eye"></i></a>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ==========================================
+        // NAVEGAÇÃO ENTRE ABAS DA SIDEBAR
+        // ==========================================
+        const menuItems = document.querySelectorAll('.menu-item');
+        const viewSections = document.querySelectorAll('.view-section');
+        const pageTitle = document.getElementById('page-title');
+        const pageSubtitle = document.getElementById('page-subtitle');
+
+        const metadataPages = {
+            'dashboard': { title: 'Dashboard', subtitle: 'Visão geral do desempenho e métricas - Ribeirão Preto' },
+            'leads': { title: 'Leads & CRM', subtitle: 'Gerenciamento inteligente de leads e conversão - Ribeirão Preto' },
+            'funil': { title: 'Funil de Vendas', subtitle: 'Acompanhamento das etapas do pipeline de atendimento' },
+            'followups': { title: 'Follow-ups', subtitle: 'Contatos pendentes e retornos agendados com clientes' },
+            'agenda': { title: 'Agenda', subtitle: 'Agendamentos e horários na Oásis Car Estética' },
+            'clientes': { title: 'Clientes', subtitle: 'Histórico de clientes cadastrados e veículos' },
+            'relatorios': { title: 'Relatórios', subtitle: 'Análise financeira e conversão de vendas' },
+            'config': { title: 'Configurações', subtitle: 'Ajustes do sistema, integrações e Supabase' }
+        };
+
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const viewName = item.getAttribute('data-view');
+                
+                // Ativar classe visual no menu
+                menuItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                // Trocar seção visível
+                viewSections.forEach(sec => sec.classList.remove('active-view'));
+                document.getElementById('view-' + viewName).classList.add('active-view');
+
+                // Atualizar cabeçalho
+                if(metadataPages[viewName]) {
+                    pageTitle.textContent = metadataPages[viewName].title;
+                    pageSubtitle.textContent = metadataPages[viewName].subtitle;
+                }
+            });
+        });
+
+        // Filtragem em tempo real
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const termo = e.target.value.toLowerCase();
+            const filtrados = cacheLeads.filter(l => 
+                (l.client_name && l.client_name.toLowerCase().includes(termo)) ||
+                (l.phone && l.phone.toLowerCase().includes(termo)) ||
+                (l.vehicle && l.vehicle.toLowerCase().includes(termo))
+            );
+            renderizarTabela(filtrados);
+        });
+
+        function abrirModalNovoLead() {
+            alert('Funcionalidade de cadastro manual de lead ativada.');
+        }
+
+        // Inicialização ao carregar a página
+        window.addEventListener('DOMContentLoaded', () => {
+            carregarLeadsSupabase();
+
+            // Configurar Realtime do Supabase caso esteja conectado
+            if(supabaseClient && !SUPABASE_URL.includes('SUA-URL')) {
+                supabaseClient
+                    .channel('public:leads')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, payload => {
+                        carregarLeadsSupabase();
+                    })
+                    .subscribe();
+            }
+        });
+    </script>
 </body>
 </html>
