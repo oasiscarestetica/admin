@@ -1,1049 +1,570 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM & Gestão | Oásis Car Estética Automotiva</title>
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            dark: '#09090b',
-                            card: '#121215',
-                            border: '#27272a',
-                            accent: '#f59e0b', // Dourado / Laranja Oásis
-                            accentHover: '#d97706',
-                            red: '#ef4444',
-                            green: '#10b981',
-                            yellow: '#f59e0b',
-                            orange: '#f97316',
-                            blue: '#3b82f6'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome -->
+    <title>Oásis Car Estética - CRM & Leads</title>
+    <!-- Fonte Inter para máxima nitidez e profissionalismo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #09090b;
-            color: #f4f4f5;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #09090b; }
-        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+        body {
+            background-color: #0c0c0e;
+            color: #f3f4f6;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
+        aside {
+            width: 260px;
+            background-color: #121215;
+            border-right: 1px solid #1f1f23;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .brand-box {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #1f1f23;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            background-color: #f59e0b;
+            color: #000;
+            font-weight: 700;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .brand-title h1 {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #fff;
+        }
+
+        .brand-title span {
+            font-size: 11px;
+            color: #f59e0b;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .menu-list {
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .menu-item:hover {
+            background-color: rgba(245, 158, 11, 0.08);
+            color: #f59e0b;
+        }
+
+        .menu-item.active {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .menu-item i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .badge-count {
+            margin-left: auto;
+            background-color: #ef4444;
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .user-footer {
+            padding: 16px;
+            border-top: 1px solid #1f1f23;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: #0f0f12;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background-color: #f59e0b;
+            color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .user-info h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .user-info span {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        /* MAIN CONTENT AREA */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background-color: #0c0c0e;
+        }
+
+        header.top-header {
+            padding: 20px 32px;
+            border-bottom: 1px solid #1f1f23;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #121215;
+        }
+
+        .header-title h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .header-title p {
+            font-size: 12.5px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-badge {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background-color: #10b981;
+            border-radius: 50%;
+        }
+
+        .icon-btn {
+            background: #1a1a1e;
+            border: 1px solid #27272a;
+            color: #9ca3af;
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .icon-btn:hover {
+            border-color: #f59e0b;
+            color: #f59e0b;
+        }
+
+        /* CONTAINER BODY */
+        .content-body {
+            padding: 32px;
+        }
+
+        /* FILTERS & SEARCH */
+        .filters-container {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 280px;
+            background: #141417;
+            border: 1px solid #27272a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
+        }
+
+        .search-box i {
+            color: #71717a;
+            font-size: 14px;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 13px;
+            width: 100%;
+            padding: 12px 0;
+            outline: none;
+        }
+
+        .search-box input::placeholder {
+            color: #71717a;
+        }
+
+        .filter-select {
+            background: #141417;
+            border: 1px solid #27272a;
+            color: #e4e4e7;
+            padding: 0 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            height: 46px;
+        }
+
+        .btn-primary {
+            background-color: #f59e0b;
+            color: #000;
+            font-weight: 700;
+            padding: 0 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            height: 46px;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: #d97706;
+        }
+
+        /* TABLE */
+        .table-card {
+            background: #121215;
+            border: 1px solid #1f1f23;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: #18181b;
+            color: #9ca3af;
+            font-size: 11.5px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 14px 20px;
+            border-bottom: 1px solid #27272a;
+        }
+
+        td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #1f1f23;
+            font-size: 13.5px;
+            color: #e4e4e7;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.015);
+        }
+
+        .client-name {
+            font-weight: 600;
+            color: #fff;
+            display: block;
+        }
+
+        .client-phone {
+            font-size: 12px;
+            color: #9ca3af;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 3px;
+        }
+
+        .client-phone i {
+            color: #10b981;
+        }
+
+        .temperature-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #fbbf24;
+        }
+
+        .temperature-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background-color: #fbbf24;
+            border-radius: 50%;
+        }
+
+        .status-tag {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .actions-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1e;
+            border: 1px solid #27272a;
+            color: #a1a1aa;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+        }
+
+        .action-icon.whatsapp:hover {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: #10b981;
+            color: #10b981;
+        }
+
+        .action-icon.view:hover {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: #f59e0b;
+            color: #f59e0b;
+        }
     </style>
 </head>
-<body class="bg-brand-dark text-white antialiased min-h-screen flex flex-col selection:bg-brand-accent selection:text-black">
+<body>
 
-    <!-- APP WRAPPER -->
-    <div class="flex h-screen overflow-hidden">
-
-        <!-- SIDEBAR -->
-        <aside id="sidebar" class="w-64 bg-brand-card border-r border-brand-border flex flex-col z-30 transition-all duration-300 -translate-x-full lg:translate-x-0 fixed lg:static h-full">
-            <!-- Logo / Brand -->
-            <div class="p-6 border-b border-brand-border flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20 text-black font-extrabold text-lg">
-                        O
-                    </div>
-                    <div>
-                        <h1 class="font-extrabold text-sm tracking-wide text-white">OÁSIS CAR</h1>
-                        <span class="text-[10px] text-amber-500 font-semibold tracking-wider uppercase">CRM Estética</span>
-                    </div>
-                </div>
-                <button onclick="toggleSidebar()" class="lg:hidden text-zinc-400 hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <!-- Navigation Links -->
-            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto text-sm font-medium">
-                <button onclick="mudarAba('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-amber-500 bg-amber-500/10 border border-amber-500/20">
-                    <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard
-                </button>
-                <button onclick="mudarAba('leads')" id="nav-leads" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-zinc-400 hover:text-white hover:bg-zinc-800/50">
-                    <i class="fa-solid fa-users w-5 text-center"></i> Leads & CRM
-                </button>
-                <button onclick="mudarAba('funil')" id="nav-funil" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-zinc-400 hover:text-white hover:bg-zinc-800/50">
-                    <i class="fa-solid fa-filter w-5 text-center"></i> Funil de Vendas
-                </button>
-                <button onclick="mudarAba('followups')" id="nav-followups" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-zinc-400 hover:text-white hover:bg-zinc-800/50">
-                    <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i> Follow-ups
-                    <span id="badge-followups" class="ml-auto bg-brand-red text-white text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
-                </button>
-                <button onclick="mudarAba('agenda')" id="nav-agenda" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-zinc-400 hover:text-white hover:bg-zinc-800/50">
-                    <i class="fa-solid fa-calendar-days w-5 text-center"></i> Agenda
-                </button>
-                <button onclick="mudarAba('clientes')" id="nav-clientes" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-zinc-400 hover:text-white hover:bg-zinc-800/50">
-                    <i class="fa-solid fa-id-card w-5 text-center"></i> Clientes
-                </button>
-                <button onclick="mudarAba('relatorios')" id="nav-relatorios" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-zinc-400 hover:text-white hover:bg-zinc-800/50">
-                    <i class="fa-solid fa-chart-line w-5 text-center"></i> Relatórios
-                </button>
-                <button onclick="mudarAba('configuracoes')" id="nav-configuracoes" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-zinc-400 hover:text-white hover:bg-zinc-800/50">
-                    <i class="fa-solid fa-gear w-5 text-center"></i> Configurações
-                </button>
-            </nav>
-
-            <!-- User Profile / Footer Sidebar -->
-            <div class="p-4 border-t border-brand-border bg-zinc-900/30">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full bg-zinc-800 border border-brand-border flex items-center justify-center font-bold text-amber-500 text-sm">
-                        OA
-                    </div>
-                    <div class="overflow-hidden">
-                        <p class="text-xs font-semibold text-white truncate">Admin Oásis Car</p>
-                        <p class="text-[10px] text-zinc-400 truncate">ribeiraopreto@oasiscar.com</p>
-                    </div>
+    <!-- SIDEBAR -->
+    <aside>
+        <div>
+            <div class="brand-box">
+                <div class="brand-logo">O</div>
+                <div class="brand-title">
+                    <h1>OÁSIS CAR</h1>
+                    <span>CRM ESTÉTICA</span>
                 </div>
             </div>
-        </aside>
-
-        <!-- MAIN CONTENT AREA -->
-        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-
-            <!-- TOPBAR -->
-            <header class="h-16 bg-brand-card border-b border-brand-border px-6 flex items-center justify-between z-20">
-                <div class="flex items-center gap-4">
-                    <button onclick="toggleSidebar()" class="lg:hidden text-zinc-400 hover:text-white text-lg">
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
-                    <div>
-                        <h2 id="page-title" class="text-base font-bold text-white tracking-tight">Dashboard Comercial</h2>
-                        <p class="text-xs text-zinc-400 hidden sm:block">Gerenciamento inteligente de leads e conversão - Ribeirão Preto</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-4">
-                    <!-- Status do Sistema -->
-                    <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistema Online
-                    </div>
-
-                    <!-- Botão Atualizar -->
-                    <button onclick="carregarLeads()" title="Atualizar dados" class="p-2.5 rounded-xl bg-zinc-900 border border-brand-border text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all">
-                        <i class="fa-solid fa-rotate"></i>
-                    </button>
-
-                    <!-- Notificações -->
-                    <div class="relative">
-                        <button onclick="toggleNotificacoes()" class="relative p-2.5 rounded-xl bg-zinc-900 border border-brand-border text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all">
-                            <i class="fa-solid fa-bell"></i>
-                            <span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-500 text-black text-[10px] font-bold flex items-center justify-center">0</span>
-                        </button>
-                        <!-- Dropdown Notificações -->
-                        <div id="notif-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-brand-card border border-brand-border rounded-2xl shadow-2xl p-4 z-50">
-                            <div class="flex items-center justify-between pb-3 border-b border-brand-border mb-3">
-                                <span class="font-bold text-xs uppercase tracking-wider text-zinc-400">Notificações</span>
-                                <span class="text-[10px] text-amber-500 cursor-pointer hover:underline" onclick="limparNotificacoes()">Marcar lidas</span>
-                            </div>
-                            <div id="lista-notificacoes" class="space-y-2.5 max-h-64 overflow-y-auto text-xs text-zinc-300">
-                                <p class="text-zinc-500 text-center py-4">Nenhuma nova notificação</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- VIEWS CONTAINER -->
-            <main class="flex-1 overflow-y-auto p-6 bg-brand-dark">
-
-                <!-- 1. VIEW: DASHBOARD -->
-                <section id="view-dashboard" class="space-y-6">
-                    <!-- KPI Cards -->
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl shadow-lg relative overflow-hidden">
-                            <div class="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl"></div>
-                            <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Leads Hoje</span>
-                            <h3 id="kpi-hoje" class="text-3xl font-extrabold text-white mt-2">0</h3>
-                            <span class="text-[11px] text-emerald-400 font-medium mt-1 inline-flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up"></span> Em tempo real</span>
-                        </div>
-                        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl shadow-lg relative overflow-hidden">
-                            <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl"></div>
-                            <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Leads na Semana</span>
-                            <h3 id="kpi-semana" class="text-3xl font-extrabold text-white mt-2">0</h3>
-                            <span class="text-[11px] text-zinc-400 font-medium mt-1 block">Últimos 7 dias</span>
-                        </div>
-                        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl shadow-lg relative overflow-hidden">
-                            <div class="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl"></div>
-                            <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Leads Quentes</span>
-                            <h3 id="kpi-quentes" class="text-3xl font-extrabold text-amber-500 mt-2">0</h3>
-                            <span class="text-[11px] text-amber-500/80 font-medium mt-1 block">Alta probabilidade</span>
-                        </div>
-                        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl shadow-lg relative overflow-hidden">
-                            <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl"></div>
-                            <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Faturamento Est.</span>
-                            <h3 id="kpi-faturamento" class="text-2xl lg:text-3xl font-extrabold text-emerald-400 mt-2">R$ 0</h3>
-                            <span class="text-[11px] text-zinc-400 font-medium mt-1 block">Baseado em orçamentos</span>
-                        </div>
-                    </div>
-
-                    <!-- Secundary KPIs / Gráficos resumidos -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <!-- Funil Resumido -->
-                        <div class="lg:col-span-2 bg-brand-card border border-brand-border p-6 rounded-2xl shadow-lg">
-                            <div class="flex items-center justify-between mb-6">
-                                <h3 class="font-bold text-sm tracking-wide text-white flex items-center gap-2">
-                                    <i class="fa-solid fa-chart-bar text-amber-500"></i> Resumo do Funil Comercial
-                                </h3>
-                                <button onclick="mudarAba('funil')" class="text-xs text-amber-500 hover:underline">Ver Kanban completo</button>
-                            </div>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-                                <div class="bg-zinc-900/60 p-4 rounded-xl border border-brand-border">
-                                    <span class="text-xs text-zinc-400">Novos</span>
-                                    <h4 id="stat-novos" class="text-xl font-extrabold text-amber-500 mt-1">0</h4>
-                                </div>
-                                <div class="bg-zinc-900/60 p-4 rounded-xl border border-brand-border">
-                                    <span class="text-xs text-zinc-400">Em Contato</span>
-                                    <h4 id="stat-contato" class="text-xl font-extrabold text-blue-400 mt-1">0</h4>
-                                </div>
-                                <div class="bg-zinc-900/60 p-4 rounded-xl border border-brand-border">
-                                    <span class="text-xs text-zinc-400">Orçamento</span>
-                                    <h4 id="stat-orcamento" class="text-xl font-extrabold text-orange-400 mt-1">0</h4>
-                                </div>
-                                <div class="bg-zinc-900/60 p-4 rounded-xl border border-brand-border">
-                                    <span class="text-xs text-zinc-400">Convertidos</span>
-                                    <h4 id="stat-convertidos" class="text-xl font-extrabold text-emerald-400 mt-1">0</h4>
-                                </div>
-                            </div>
-
-                            <!-- Métricas de Eficiência -->
-                            <div class="mt-6 pt-6 border-t border-brand-border grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
-                                <div>
-                                    <span class="text-zinc-400 block">Taxa de Conversão</span>
-                                    <strong id="metric-conversao" class="text-base text-white">0%</strong>
-                                </div>
-                                <div>
-                                    <span class="text-zinc-400 block">Ticket Médio</span>
-                                    <strong id="metric-ticket" class="text-base text-white">R$ 0</strong>
-                                </div>
-                                <div>
-                                    <span class="text-zinc-400 block">Sem Resposta</span>
-                                    <strong id="metric-sem-resposta" class="text-base text-brand-red">0 leads</strong>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Ações Rápidas / Alertas -->
-                        <div class="bg-brand-card border border-brand-border p-6 rounded-2xl shadow-lg flex flex-col justify-between">
-                            <div>
-                                <h3 class="font-bold text-sm tracking-wide text-white mb-4 flex items-center gap-2">
-                                    <i class="fa-solid fa-bolt text-amber-500"></i> Ações & Follow-ups
-                                </h3>
-                                <div id="dashboard-followups-list" class="space-y-3 text-xs">
-                                    <p class="text-zinc-500 text-center py-4">Nenhum follow-up pendente para hoje.</p>
-                                </div>
-                            </div>
-                            <button onclick="mudarAba('followups')" class="w-full mt-4 bg-zinc-900 hover:bg-zinc-800 border border-brand-border text-white font-semibold py-2.5 rounded-xl transition-all text-xs">
-                                Gerenciar Todos Follow-ups
-                            </button>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 2. VIEW: LEADS & CRM -->
-                <section id="view-leads" class="hidden space-y-6">
-                    <!-- Barra de Pesquisa e Filtros -->
-                    <div class="bg-brand-card border border-brand-border p-4 rounded-2xl shadow-lg flex flex-col md:flex-row gap-4 items-center justify-between">
-                        <div class="relative w-full md:w-96">
-                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm"></i>
-                            <input type="text" id="filtro-busca" oninput="filtrarLeads()" placeholder="Pesquisar cliente, telefone ou veículo..." 
-                                class="w-full bg-zinc-900 border border-brand-border rounded-xl pl-11 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
-                        </div>
-
-                        <!-- Filtros Rápidos de Status -->
-                        <div class="flex flex-wrap gap-2 w-full md:w-auto items-center">
-                            <select id="filtro-status" onchange="filtrarLeads()" class="bg-zinc-900 border border-brand-border rounded-xl px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-amber-500">
-                                <option value="todos">Todos os Status</option>
-                                <option value="NOVO">Novos</option>
-                                <option value="EM CONTATO">Em Contato</option>
-                                <option value="INTERESSADOS">Interessados</option>
-                                <option value="ORÇAMENTO">Orçamento</option>
-                                <option value="AGENDADOS">Agendados</option>
-                                <option value="CONVERTIDOS">Convertidos</option>
-                                <option value="PERDIDOS">Perdidos</option>
-                            </select>
-
-                            <select id="filtro-temperatura" onchange="filtrarLeads()" class="bg-zinc-900 border border-brand-border rounded-xl px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-amber-500">
-                                <option value="todas">Todas Temperaturas</option>
-                                <option value="frio">❄️ Frio</option>
-                                <option value="morno">🟡 Morno</option>
-                                <option value="quente">🟠 Quente</option>
-                                <option value="muito_quente">🔥 Muito Quente</option>
-                            </select>
-
-                            <button onclick="abrirModalNovoLead()" class="bg-amber-500 hover:bg-amber-600 text-black font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center gap-2">
-                                <i class="fa-solid fa-plus"></i> Novo Lead
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Tabela de Leads CRM -->
-                    <div class="bg-brand-card border border-brand-border rounded-2xl shadow-lg overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr class="border-b border-brand-border bg-zinc-900/50 text-zinc-400 uppercase tracking-wider font-semibold text-[11px]">
-                                        <th class="p-4">Cliente / Contato</th>
-                                        <th class="p-4">Veículo</th>
-                                        <th class="p-4">Servço</th>
-                                        <th class="p-4">Temperatura / Score</th>
-                                        <th class="p-4">Status</th>
-                                        <th class="p-4">Valor Est.</th>
-                                        <th class="p-4 text-right">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabela-leads-body" class="divide-y divide-brand-border text-zinc-300">
-                                    <!-- Inserido dinamicamente via JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 3. VIEW: FUNIL DE VENDAS (KANBAN) -->
-                <section id="view-funil" class="hidden space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="font-bold text-lg text-white">Funil Comercial (Kanban)</h3>
-                            <p class="text-xs text-zinc-400">Arraste ou altere o status dos leads para movimentá-los no processo.</p>
-                        </div>
-                    </div>
-
-                    <!-- Kanban Board Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4 overflow-x-auto pb-4 items-start">
-                        <!-- Coluna Novos -->
-                        <div class="bg-brand-card border border-brand-border rounded-2xl p-3 flex flex-col min-w-[220px]">
-                            <div class="flex items-center justify-between pb-3 border-b border-brand-border mb-3">
-                                <span class="font-bold text-xs uppercase tracking-wider text-amber-500 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Novos</span>
-                                <span id="count-novos" class="bg-zinc-900 text-zinc-400 px-2 py-0.5 rounded-md text-[10px] font-bold">0</span>
-                            </div>
-                            <div id="kanban-novos" class="space-y-3 min-h-[400px] flex-1"></div>
-                        </div>
-
-                        <!-- Coluna Em Contato -->
-                        <div class="bg-brand-card border border-brand-border rounded-2xl p-3 flex flex-col min-w-[220px]">
-                            <div class="flex items-center justify-between pb-3 border-b border-brand-border mb-3">
-                                <span class="font-bold text-xs uppercase tracking-wider text-blue-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-blue-400"></span> Em Contato</span>
-                                <span id="count-contato" class="bg-zinc-900 text-zinc-400 px-2 py-0.5 rounded-md text-[10px] font-bold">0</span>
-                            </div>
-                            <div id="kanban-contato" class="space-y-3 min-h-[400px] flex-1"></div>
-                        </div>
-
-                        <!-- Coluna Interessados -->
-                        <div class="bg-brand-card border border-brand-border rounded-2xl p-3 flex flex-col min-w-[220px]">
-                            <div class="flex items-center justify-between pb-3 border-b border-brand-border mb-3">
-                                <span class="font-bold text-xs uppercase tracking-wider text-indigo-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-400"></span> Interessados</span>
-                                <span id="count-interessados" class="bg-zinc-900 text-zinc-400 px-2 py-0.5 rounded-md text-[10px] font-bold">0</span>
-                            </div>
-                            <div id="kanban-interessados" class="space-y-3 min-h-[400px] flex-1"></div>
-                        </div>
-
-                        <!-- Coluna Orçamento -->
-                        <div class="bg-brand-card border border-brand-border rounded-2xl p-3 flex flex-col min-w-[220px]">
-                            <div class="flex items-center justify-between pb-3 border-b border-brand-border mb-3">
-                                <span class="font-bold text-xs uppercase tracking-wider text-orange-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-orange-400"></span> Orçamento</span>
-                                <span id="count-orcamento" class="bg-zinc-900 text-zinc-400 px-2 py-0.5 rounded-md text-[10px] font-bold">0</span>
-                            </div>
-                            <div id="kanban-orcamento" class="space-y-3 min-h-[400px] flex-1"></div>
-                        </div>
-
-                        <!-- Coluna Agendados -->
-                        <div class="bg-brand-card border border-brand-border rounded-2xl p-3 flex flex-col min-w-[220px]">
-                            <div class="flex items-center justify-between pb-3 border-b border-brand-border mb-3">
-                                <span class="font-bold text-xs uppercase tracking-wider text-purple-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-purple-400"></span> Agendados</span>
-                                <span id="count-agendados" class="bg-zinc-900 text-zinc-400 px-2 py-0.5 rounded-md text-[10px] font-bold">0</span>
-                            </div>
-                            <div id="kanban-agendados" class="space-y-3 min-h-[400px] flex-1"></div>
-                        </div>
-
-                        <!-- Coluna Convertidos -->
-                        <div class="bg-brand-card border border-brand-border rounded-2xl p-3 flex flex-col min-w-[220px]">
-                            <div class="flex items-center justify-between pb-3 border-b border-brand-border mb-3">
-                                <span class="font-bold text-xs uppercase tracking-wider text-emerald-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Convertidos</span>
-                                <span id="count-convertidos" class="bg-zinc-900 text-zinc-400 px-2 py-0.5 rounded-md text-[10px] font-bold">0</span>
-                            </div>
-                            <div id="kanban-convertidos" class="space-y-3 min-h-[400px] flex-1"></div>
-                        </div>
-
-                        <!-- Coluna Perdidos -->
-                        <div class="bg-brand-card border border-brand-border rounded-2xl p-3 flex flex-col min-w-[220px]">
-                            <div class="flex items-center justify-between pb-3 border-b border-brand-border mb-3">
-                                <span class="font-bold text-xs uppercase tracking-wider text-red-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-400"></span> Perdidos</span>
-                                <span id="count-perdidos" class="bg-zinc-900 text-zinc-400 px-2 py-0.5 rounded-md text-[10px] font-bold">0</span>
-                            </div>
-                            <div id="kanban-perdidos" class="space-y-3 min-h-[400px] flex-1"></div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 4. VIEW: FOLLOW-UPS -->
-                <section id="view-followups" class="hidden space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="font-bold text-lg text-white">Central de Follow-ups</h3>
-                            <p class="text-xs text-zinc-400">Acompanhamentos agendados e retornos pendentes com clientes.</p>
-                        </div>
-                        <button onclick="abrirModalFollowUp()" class="bg-amber-500 hover:bg-amber-600 text-black font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center gap-2">
-                            <i class="fa-solid fa-plus"></i> Novo Follow-up
-                        </button>
-                    </div>
-
-                    <div class="bg-brand-card border border-brand-border rounded-2xl shadow-lg p-6">
-                        <div id="lista-followups-completa" class="space-y-4">
-                            <!-- Inserido via JS -->
-                            <p class="text-zinc-500 text-center py-8 text-xs">Nenhum follow-up cadastrado.</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 5. VIEW: AGENDA -->
-                <section id="view-agenda" class="hidden space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="font-bold text-lg text-white">Agenda de Serviços</h3>
-                            <p class="text-xs text-zinc-400">Serviços agendados e confirmados na Oásis Car Estética.</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-brand-card border border-brand-border rounded-2xl shadow-lg p-6">
-                        <div id="lista-agenda-completa" class="space-y-4">
-                            <!-- Inserido via JS -->
-                            <p class="text-zinc-500 text-center py-8 text-xs">Nenhum agendamento registrado no momento.</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 6. VIEW: CLIENTES -->
-                <section id="view-clientes" class="hidden space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="font-bold text-lg text-white">Base de Clientes (Convertidos)</h3>
-                            <p class="text-xs text-zinc-400">Histórico de clientes que já realizaram serviços na estética.</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-brand-card border border-brand-border rounded-2xl shadow-lg overflow-hidden">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr class="border-b border-brand-border bg-zinc-900/50 text-zinc-400 uppercase tracking-wider font-semibold text-[11px]">
-                                    <th class="p-4">Cliente</th>
-                                    <th class="p-4">Veículo</th>
-                                    <th class="p-4">Serviços Realizados</th>
-                                    <th class="p-4">Valor Total Gasto</th>
-                                    <th class="p-4 text-right">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabela-clientes-body" class="divide-y divide-brand-border text-zinc-300">
-                                <!-- Inserido via JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- 7. VIEW: RELATÓRIOS -->
-                <section id="view-relatorios" class="hidden space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="font-bold text-lg text-white">Relatórios & Performance</h3>
-                            <p class="text-xs text-zinc-400">Métricas de conversão, ticket médio e origens de tráfego.</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="bg-brand-card border border-brand-border p-6 rounded-2xl shadow-lg">
-                            <h4 class="font-bold text-sm text-white mb-3">Conversão Geral</h4>
-                            <div class="flex items-center justify-between text-xs mb-2">
-                                <span class="text-zinc-400">Total de Leads:</span>
-                                <span id="rel-total-leads" class="font-bold text-white">0</span>
-                            </div>
-                            <div class="flex items-center justify-between text-xs mb-2">
-                                <span class="text-zinc-400">Convertidos:</span>
-                                <span id="rel-total-convertidos" class="font-bold text-emerald-400">0</span>
-                            </div>
-                            <div class="flex items-center justify-between text-xs">
-                                <span class="text-zinc-400">Taxa:</span>
-                                <span id="rel-taxa-conv" class="font-bold text-amber-500">0%</span>
-                            </div>
-                        </div>
-
-                        <div class="bg-brand-card border border-brand-border p-6 rounded-2xl shadow-lg">
-                            <h4 class="font-bold text-sm text-white mb-3">Financeiro</h4>
-                            <div class="flex items-center justify-between text-xs mb-2">
-                                <span class="text-zinc-400">Ticket Médio:</span>
-                                <span id="rel-ticket-medio" class="font-bold text-white">R$ 0</span>
-                            </div>
-                            <div class="flex items-center justify-between text-xs mb-2">
-                                <span class="text-zinc-400">Faturamento Potencial:</span>
-                                <span id="rel-fat-potencial" class="font-bold text-emerald-400">R$ 0</span>
-                            </div>
-                        </div>
-
-                        <div class="bg-brand-card border border-brand-border p-6 rounded-2xl shadow-lg">
-                            <h4 class="font-bold text-sm text-white mb-3">Perdas e Gargalos</h4>
-                            <div class="flex items-center justify-between text-xs mb-2">
-                                <span class="text-zinc-400">Leads Perdidos:</span>
-                                <span id="rel-perdidos" class="font-bold text-brand-red">0</span>
-                            </div>
-                            <div class="flex items-center justify-between text-xs">
-                                <span class="text-zinc-400">Sem Resposta:</span>
-                                <span id="rel-sem-resposta" class="font-bold text-amber-500">0</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 8. VIEW: CONFIGURAÇÕES -->
-                <section id="view-configuracoes" class="hidden space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="font-bold text-lg text-white">Configurações do Sistema</h3>
-                            <p class="text-xs text-zinc-400">Parâmetros de integração com o Supabase e WhatsApp.</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-brand-card border border-brand-border rounded-2xl shadow-lg p-6 max-w-2xl space-y-4 text-xs">
-                        <div>
-                            <label class="block text-zinc-400 mb-1 font-semibold">Supabase URL</label>
-                            <input type="text" readonly value="https://pyodkkcmuoqrsnnifdqf.supabase.co" class="w-full bg-zinc-900 border border-brand-border rounded-xl px-4 py-2.5 text-zinc-400">
-                        </div>
-                        <div>
-                            <label class="block text-zinc-400 mb-1 font-semibold">Tabela de Leads</label>
-                            <input type="text" readonly value="orcamentos" class="w-full bg-zinc-900 border border-brand-border rounded-xl px-4 py-2.5 text-zinc-400">
-                        </div>
-                        <div>
-                            <label class="block text-zinc-400 mb-1 font-semibold">WhatsApp Comercial Padrão</label>
-                            <input type="text" value="+55 (16) 99140-8438" class="w-full bg-zinc-900 border border-brand-border rounded-xl px-4 py-2.5 text-white">
-                        </div>
-                        <div class="pt-4">
-                            <button onclick="alert('Configurações salvas com sucesso!')" class="bg-amber-500 hover:bg-amber-600 text-black font-bold px-6 py-2.5 rounded-xl transition-all">Salvar Alterações</button>
-                        </div>
-                    </div>
-                </section>
-
-            </main>
-        </div>
-    </div>
-
-    <!-- MODAL DE DETALHES / CRM DO LEAD -->
-    <div id="modal-lead" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-brand-card border border-brand-border rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl space-y-6">
-            <div class="flex items-center justify-between border-b border-brand-border pb-4">
-                <div>
-                    <h3 id="modal-cliente-nome" class="text-lg font-bold text-white">Nome do Cliente</h3>
-                    <p class="text-xs text-zinc-400">Detalhes completos e histórico comercial</p>
-                </div>
-                <button onclick="fecharModalLead()" class="text-zinc-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
-                <div class="bg-zinc-900/50 p-3 rounded-xl border border-brand-border">
-                    <span class="text-zinc-400 block mb-1">Veículo</span>
-                    <strong id="modal-cliente-veiculo" class="text-white text-sm">--</strong>
-                </div>
-                <div class="bg-zinc-900/50 p-3 rounded-xl border border-brand-border">
-                    <span class="text-zinc-400 block mb-1">Serviço</span>
-                    <strong id="modal-cliente-servico" class="text-white text-sm">--</strong>
-                </div>
-                <div class="bg-zinc-900/50 p-3 rounded-xl border border-brand-border">
-                    <span class="text-zinc-400 block mb-1">Status Atual</span>
-                    <select id="modal-select-status" onchange="atualizarStatusLeadModal()" class="w-full bg-zinc-800 border border-brand-border rounded-lg p-1 text-white text-xs">
-                        <option value="NOVO">NOVO</option>
-                        <option value="EM CONTATO">EM CONTATO</option>
-                        <option value="INTERESSADOS">INTERESSADOS</option>
-                        <option value="ORÇAMENTO">ORÇAMENTO</option>
-                        <option value="AGENDADOS">AGENDADOS</option>
-                        <option value="CONVERTIDOS">CONVERTIDOS</option>
-                        <option value="PERDIDOS">PERDIDOS</option>
-                    </select>
-                </div>
-                <div class="bg-zinc-900/50 p-3 rounded-xl border border-brand-border">
-                    <span class="text-zinc-400 block mb-1">Temperatura</span>
-                    <select id="modal-select-temperatura" onchange="atualizarTemperaturaLeadModal()" class="w-full bg-zinc-800 border border-brand-border rounded-lg p-1 text-white text-xs">
-                        <option value="frio">❄️ Frio</option>
-                        <option value="morno">🟡 Morno</option>
-                        <option value="quente">🟠 Quente</option>
-                        <option value="muito_quente">🔥 Muito Quente</option>
-                    </select>
-                </div>
-                <div class="bg-zinc-900/50 p-3 rounded-xl border border-brand-border">
-                    <span class="text-zinc-400 block mb-1">Valor Estimado (R$)</span>
-                    <input type="number" id="modal-input-valor" onchange="atualizarValorLeadModal()" placeholder="0.00" class="w-full bg-zinc-800 border border-brand-border rounded-lg p-1 text-white text-xs">
-                </div>
-                <div class="bg-zinc-900/50 p-3 rounded-xl border border-brand-border">
-                    <span class="text-zinc-400 block mb-1">Data de Entrada</span>
-                    <span id="modal-cliente-data" class="text-white">--</span>
-                </div>
-            </div>
-
-            <!-- Ações Rápidas WhatsApp -->
-            <div class="pt-2">
-                <label class="block text-xs font-semibold text-zinc-300 mb-2">Ações & Mensagem WhatsApp</label>
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="enviarZapTemplate(1)" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all">
-                        <i class="fa-brands fa-whatsapp text-sm"></i> Abordagem Inicial
-                    </button>
-                    <button onclick="enviarZapTemplate(2)" class="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border border-brand-border">
-                        <i class="fa-brands fa-whatsapp text-sm text-emerald-400"></i> Enviar Orçamento
-                    </button>
-                    <button onclick="enviarZapTemplate(3)" class="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border border-brand-border">
-                        <i class="fa-brands fa-whatsapp text-sm text-emerald-400"></i> Follow-up Retorno
-                    </button>
-                </div>
-            </div>
-
-            <!-- Observações e Timeline -->
-            <div class="space-y-3 pt-2 border-t border-brand-border">
-                <label class="block text-xs font-semibold text-zinc-300">Observações & Histórico</label>
-                <textarea id="modal-input-obs" rows="3" onchange="salvarObservacoesModal()" placeholder="Adicione anotações sobre o cliente..." class="w-full bg-zinc-900 border border-brand-border rounded-xl p-3 text-xs text-white focus:outline-none focus:border-amber-500"></textarea>
-            </div>
-        </div>
-    </div>
-
-    <!-- SCRIPT DO CRM COMPLETO -->
-    <script>
-        // Configuração Supabase
-        const SUPABASE_URL = 'https://pyodkkcmuoqrsnnifdqf.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_9jxs8Rc9L6BDNTvpT8fQ_A_dQSjuSHd';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const numeroWhatsAppPadrao = '5516991408438';
-
-        let leadsGlobais = [];
-        let leadAtualId = null;
-
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', () => {
-            carregarLeads();
-        });
-
-        // Navegação de Abas
-        function mudarAba(aba) {
-            const abas = ['dashboard', 'leads', 'funil', 'followups', 'agenda', 'clientes', 'relatorios', 'configuracoes'];
-            abas.forEach(a => {
-                document.getElementById(`view-${a}`).classList.add('hidden');
-                document.getElementById(`nav-${a}`).className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-zinc-400 hover:text-white hover:bg-zinc-800/50";
-            });
-
-            document.getElementById(`view-${aba}`).classList.remove('hidden');
-            document.getElementById(`nav-${aba}`).className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-amber-500 bg-amber-500/10 border border-amber-500/20";
             
-            const titles = {
-                dashboard: 'Dashboard Comercial',
-                leads: 'Leads & CRM',
-                funil: 'Funil de Vendas (Kanban)',
-                followups: 'Central de Follow-ups',
-                agenda: 'Agenda de Serviços',
-                clientes: 'Base de Clientes',
-                relatorios: 'Relatórios de Desempenho',
-                configuracoes: 'Configurações'
-            };
-            document.getElementById('page-title').innerText = titles[aba];
+            <div class="menu-list">
+                <a href="#" class="menu-item"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+                <a href="#" class="menu-item active"><i class="fa-solid fa-users-gear"></i> Leads & CRM</a>
+                <a href="#" class="menu-item"><i class="fa-solid fa-filter"></i> Funil de Vendas</a>
+                <a href="#" class="menu-item"><i class="fa-solid fa-clock-rotate-left"></i> Follow-ups <span class="badge-count">0</span></a>
+                <a href="#" class="menu-item"><i class="fa-solid fa-calendar-days"></i> Agenda</a>
+                <a href="#" class="menu-item"><i class="fa-solid fa-user-group"></i> Clientes</a>
+                <a href="#" class="menu-item"><i class="fa-solid fa-chart-line"></i> Relatórios</a>
+                <a href="#" class="menu-item"><i class="fa-solid fa-gear"></i> Configurações</a>
+            </div>
+        </div>
 
-            if(aba === 'funil') renderizarKanban();
-            if(aba === 'clientes') renderizarClientes();
-            if(aba === 'relatorios') calcularRelatorios();
-        }
+        <div class="user-footer">
+            <div class="user-avatar">OA</div>
+            <div class="user-info">
+                <h4>Admin Oásis Car</h4>
+                <span>ribeiraopreto@oasiscar.com</span>
+            </div>
+        </div>
+    </aside>
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('-translate-x-full');
-        }
+    <!-- MAIN INTERFACE -->
+    <main>
+        <header class="top-header">
+            <div class="header-title">
+                <h2>Leads & CRM</h2>
+                <p>Gerenciamento inteligente de leads e conversão - Ribeirão Preto</p>
+            </div>
+            <div class="header-actions">
+                <div class="status-badge">Sistema Online</div>
+                <button class="icon-btn" title="Atualizar dados"><i class="fa-solid fa-rotate"></i></button>
+                <button class="icon-btn" title="Notificações"><i class="fa-regular fa-bell"></i></button>
+            </div>
+        </header>
 
-        function toggleNotificacoes() {
-            const dropdown = document.getElementById('notif-dropdown');
-            dropdown.classList.toggle('hidden');
-        }
+        <div class="content-body">
+            <!-- BARRA DE FILTROS E BUSCA -->
+            <div class="filters-container">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="PESQUISAR CLIENTE, TELEFONE OU VEÍCULO...">
+                </div>
 
-        function limparNotificacoes() {
-            document.getElementById('notif-badge').innerText = '0';
-            document.getElementById('lista-notificacoes').innerHTML = '<p class="text-zinc-500 text-center py-4">Nenhuma nova notificação</p>';
-        }
+                <select class="filter-select">
+                    <option>TODOS OS STATUS</option>
+                    <option>Novo</option>
+                    <option>Em Contato</option>
+                    <option>Agendado</option>
+                    <option>Concluído</option>
+                </select>
 
-        // Carregar Leads do Supabase (Mantendo 100% a tabela original)
-        async function carregarLeads() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('orcamentos')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+                <select class="filter-select">
+                    <option>TODAS TEMPERATURAS</option>
+                    <option>Quente</option>
+                    <option>Morno</option>
+                    <option>Frio</option>
+                </select>
 
-                if (error) {
-                    console.error('Erro ao buscar leads:', error.message);
-                    return;
-                }
+                <button class="btn-primary">
+                    <i class="fa-solid fa-plus"></i> NOVO LEAD
+                </button>
+            </div>
 
-                // Enriquecer dados com campos extras de CRM salvos em localStorage (para não quebrar a tabela original)
-                const crmMeta = JSON.parse(localStorage.getItem('oasis_crm_meta') || '{}');
+            <!-- TABELA DE LEADS -->
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente / Contato</th>
+                            <th>Veículo</th>
+                            <th>Serviço</th>
+                            <th>Temperatura / Score</th>
+                            <th>Status</th>
+                            <th>Valor Est.</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <span class="client-name">GUSTAVO HENRIQUE</span>
+                                <span class="client-phone"><i class="fa-brands fa-whatsapp"></i> (16) 99140-8438</span>
+                            </td>
+                            <td>PORSCHE (2013) - BRANCO</td>
+                            <td style="font-weight: 500;">HIGIENIZAÇÃO INTERNA</td>
+                            <td>
+                                <div class="temperature-badge">MORNO</div>
+                                <div style="font-size: 11px; color: #71717a; margin-top: 2px;">SCORE: 50</div>
+                            </td>
+                            <td><span class="status-tag">NOVO</span></td>
+                            <td style="font-weight: 600; color: #10b981;">R$ 0,00</td>
+                            <td>
+                                <div class="actions-group">
+                                    <a href="https://wa.me/5516991408438" target="_blank" class="action-icon whatsapp" title="Abrir WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                                    <a href="#" class="action-icon view" title="Visualizar Detalhes"><i class="fa-regular fa-eye"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="client-name">JOSE HENRIQUE</span>
+                                <span class="client-phone"><i class="fa-brands fa-whatsapp"></i> (16) 99140-8438</span>
+                            </td>
+                            <td>HONDA (2020) - PRETO</td>
+                            <td style="font-weight: 500;">VITRIFICAÇÃO</td>
+                            <td>
+                                <div class="temperature-badge">MORNO</div>
+                                <div style="font-size: 11px; color: #71717a; margin-top: 2px;">SCORE: 50</div>
+                            </td>
+                            <td><span class="status-tag">NOVO</span></td>
+                            <td style="font-weight: 600; color: #10b981;">R$ 0,00</td>
+                            <td>
+                                <div class="actions-group">
+                                    <a href="https://wa.me/5516991408438" target="_blank" class="action-icon whatsapp" title="Abrir WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                                    <a href="#" class="action-icon view" title="Visualizar Detalhes"><i class="fa-regular fa-eye"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 
-                leadsGlobais = (data || []).map(lead => {
-                    const meta = crmMeta[lead.id] || {};
-                    return {
-                        ...lead,
-                        temperatura: meta.temperatura || 'morno',
-                        score: meta.score || 50,
-                        valor: meta.valor || 0,
-                        telefone: meta.telefone || '(16) 99140-8438',
-                        observacoes: meta.observacoes || '',
-                        proximo_contato: meta.proximo_contato || ''
-                    };
-                });
-
-                atualizarDashboard();
-                renderizarTabelaLeads(leadsGlobais);
-                renderizarKanban();
-                atualizarBadgeNotificacoes();
-
-            } catch (err) {
-                console.error('Erro de conexão:', err);
-            }
-        }
-
-        function salvarMetaLead(id, novosDados) {
-            const crmMeta = JSON.parse(localStorage.getItem('oasis_crm_meta') || '{}');
-            crmMeta[id] = { ...(crmMeta[id] || {}), ...novosDados };
-            localStorage.setItem('oasis_crm_meta', JSON.stringify(crmMeta));
-        }
-
-        // Atualizar Dashboard KPIs
-        function atualizarDashboard() {
-            const hoje = new Date().toISOString().split('T')[0];
-            let qtdHoje = 0;
-            let qtdSemana = 0;
-            let qtdQuentes = 0;
-            let faturamentoEst = 0;
-            let novos = 0, contato = 0, orcamento = 0, convertidos = 0;
-
-            const umaSemanaAtrás = new Date();
-            umaSemanaAtrás.setDate(umaSemanaAtrás.getDate() - 7);
-
-            leadsGlobais.forEach(l => {
-                const dataLead = l.created_at ? l.created_at.split('T')[0] : '';
-                if (dataLead === hoje) qtdHoje++;
-                if (new Date(l.created_at) >= umaSemanaAtrás) qtdSemana++;
-                if (l.temperatura === 'quente' || l.temperatura === 'muito_quente') qtdQuentes++;
-                if (l.status === 'CONVERTIDOS') faturamentoEst += Number(l.valor || 0);
-
-                if (l.status === 'NOVO') novos++;
-                if (l.status === 'EM CONTATO') contato++;
-                if (l.status === 'ORÇAMENTO') orcamento++;
-                if (l.status === 'CONVERTIDOS') convertidos++;
-            });
-
-            document.getElementById('kpi-hoje').innerText = qtdHoje;
-            document.getElementById('kpi-semana').innerText = qtdSemana;
-            document.getElementById('kpi-quentes').innerText = qtdQuentes;
-            document.getElementById('kpi-faturamento').innerText = `R$ ${faturamentoEst.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-
-            document.getElementById('stat-novos').innerText = novos;
-            document.getElementById('stat-contato').innerText = contato;
-            document.getElementById('stat-orcamento').innerText = orcamento;
-            document.getElementById('stat-convertidos').innerText = convertidos;
-
-            const taxa = leadsGlobais.length > 0 ? ((convertidos / leadsGlobais.length) * 100).toFixed(1) : 0;
-            document.getElementById('metric-conversao').innerText = `${taxa}%`;
-
-            const ticket = convertidos > 0 ? (faturamentoEst / convertidos) : 0;
-            document.getElementById('metric-ticket').innerText = `R$ ${ticket.toLocaleString('pt-BR', {maximumFractionDigits: 0})}`;
-
-            const semResposta = leadsGlobais.filter(l => l.status === 'NOVO').length;
-            document.getElementById('metric-sem-resposta').innerText = `${semResposta} leads`;
-        }
-
-        // Renderizar Tabela de Leads
-        function renderizarTabelaLeads(lista) {
-            const tbody = document.getElementById('tabela-leads-body');
-            tbody.innerHTML = '';
-
-            if (lista.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-zinc-500">Nenhum lead encontrado.</td></tr>`;
-                return;
-            }
-
-            lista.forEach(l => {
-                const tempBadge = {
-                    'frio': '<span class="text-blue-400">❄️ Frio</span>',
-                    'morno': '<span class="text-amber-400">🟡 Morno</span>',
-                    'quente': '<span class="text-orange-400">🟠 Quente</span>',
-                    'muito_quente': '<span class="text-red-400 font-bold">🔥 Muito Quente</span>'
-                }[l.temperatura] || '🟡 Morno';
-
-                const statusColor = {
-                    'NOVO': 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-                    'EM CONTATO': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-                    'INTERESSADOS': 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
-                    'ORÇAMENTO': 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-                    'AGENDADOS': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-                    'CONVERTIDOS': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-                    'PERDIDOS': 'bg-red-500/10 text-red-400 border-red-500/20'
-                }[l.status] || 'bg-zinc-800 text-zinc-300';
-
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-zinc-900/40 transition-colors cursor-pointer";
-                tr.onclick = (e) => {
-                    if(e.target.tagName !== 'BUTTON' && e.target.tagName !== 'I') abrirModalLead(l.id);
-                };
-
-                tr.innerHTML = `
-                    <td class="p-4">
-                        <strong class="text-white block">${l.nome}</strong>
-                        <span class="text-[11px] text-zinc-400"><i class="fa-brands fa-whatsapp text-emerald-400"></i> ${l.telefone}</span>
-                    </td>
-                    <td class="p-4">${l.veiculo}</td>
-                    <td class="p-4"><span class="font-medium text-zinc-200">${l.servico}</span></td>
-                    <td class="p-4">${tempBadge} <div class="text-[10px] text-zinc-500">Score: ${l.score}</div></td>
-                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${statusColor}">${l.status}</span></td>
-                    <td class="p-4 font-semibold text-emerald-400">R$ ${Number(l.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                    <td class="p-4 text-right space-x-2">
-                        <button onclick="abrirWhatsApp('${l.telefone}', '${l.nome}', '${l.servico}', '${l.veiculo}')" class="p-2 rounded-xl bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 transition-all" title="Abrir WhatsApp">
-                            <i class="fa-brands fa-whatsapp text-sm"></i>
-                        </button>
-                        <button onclick="abrirModalLead('${l.id}')" class="p-2 rounded-xl bg-zinc-800 text-zinc-300 hover:text-white transition-all" title="Detalhes do Lead">
-                            <i class="fa-solid fa-eye text-sm"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // Filtro de Leads
-        function filtrarLeads() {
-            const termo = document.getElementById('filtro-busca').value.toLowerCase();
-            const statusFiltro = document.getElementById('filtro-status').value;
-            const tempFiltro = document.getElementById('filtro-temperatura').value;
-
-            const filtrados = leadsGlobais.filter(l => {
-                const matchTermo = l.nome.toLowerCase().includes(termo) || l.veiculo.toLowerCase().includes(termo) || l.servico.toLowerCase().includes(termo);
-                const matchStatus = statusFiltro === 'todos' || l.status === statusFiltro;
-                const matchTemp = tempFiltro === 'todas' || l.temperatura === tempFiltro;
-                return matchTermo && matchStatus && matchTemp;
-            });
-
-            renderizarTabelaLeads(filtrados);
-        }
-
-        // Renderizar Kanban Funnel
-        function renderizarKanban() {
-            const colunas = {
-                'NOVO': document.getElementById('kanban-novos'),
-                'EM CONTATO': document.getElementById('kanban-contato'),
-                'INTERESSADOS': document.getElementById('kanban-interessados'),
-                'ORÇAMENTO': document.getElementById('kanban-orcamento'),
-                'AGENDADOS': document.getElementById('kanban-agendados'),
-                'CONVERTIDOS': document.getElementById('kanban-convertidos'),
-                'PERDIDOS': document.getElementById('kanban-perdidos')
-            };
-
-            const contadores = { 'NOVO': 0, 'EM CONTATO': 0, 'INTERESSADOS': 0, 'ORÇAMENTO': 0, 'AGENDADOS': 0, 'CONVERTIDOS': 0, 'PERDIDOS': 0 };
-
-            Object.values(colunas).forEach(c => c.innerHTML = '');
-
-            leadsGlobais.forEach(l => {
-                const statusKey = colunas[l.status] ? l.status : 'NOVO';
-                contadores[statusKey]++;
-
-                const card = document.createElement('div');
-                card.className = "bg-zinc-900 border border-brand-border rounded-xl p-3 shadow-md hover:border-amber-500/50 transition-all cursor-pointer";
-                card.onclick = () => abrirModalLead(l.id);
-                card.innerHTML = `
-                    <div class="flex items-center justify-between mb-2">
-                        <strong class="text-white text-xs truncate">${l.nome}</strong>
-                        <span class="text-[10px] text-amber-500">${l.temperatura === 'muito_quente' ? '🔥' : '🟡'}</span>
-                    </div>
-                    <p class="text-[11px] text-zinc-400 mb-1">${l.veiculo}</p>
-                    <p class="text-[11px] font-semibold text-zinc-200 mb-2">${l.servico}</p>
-                    <div class="flex items-center justify-between pt-2 border-t border-brand-border text-[10px] text-zinc-500">
-                        <span>R$ ${Number(l.valor || 0).toLocaleString('pt-BR')}</span>
-                        <button onclick="event.stopPropagation(); abrirWhatsApp('${l.telefone}', '${l.nome}', '${l.servico}', '${l.veiculo}')" class="text-emerald-400 hover:underline"><i class="fa-brands fa-whatsapp"></i> Chat</button>
-                    </div>
-                `;
-                colunas[statusKey].appendChild(card);
-            });
-
-            document.getElementById('count-novos').innerText = contadores['NOVO'];
-            document.getElementById('count-contato').innerText = contadores['EM CONTATO'];
-            document.getElementById('count-interessados').innerText = contadores['INTERESSADOS'];
-            document.getElementById('count-orcamento').innerText = contadores['ORÇAMENTO'];
-            document.getElementById('count-agendados').innerText = contadores['AGENDADOS'];
-            document.getElementById('count-convertidos').innerText = contadores['CONVERTIDOS'];
-            document.getElementById('count-perdidos').innerText = contadores['PERDIDOS'];
-        }
-
-        // Modal de Lead
-        function abrirModalLead(id) {
-            const lead = leadsGlobais.find(l => l.id == id);
-            if (!lead) return;
-
-            leadAtualId = id;
-            document.getElementById('modal-cliente-nome').innerText = lead.nome;
-            document.getElementById('modal-cliente-veiculo').innerText = lead.veiculo;
-            document.getElementById('modal-cliente-servico').innerText = lead.servico;
-            document.getElementById('modal-cliente-data').innerText = new Date(lead.created_at).toLocaleString('pt-BR');
-            document.getElementById('modal-select-status').value = lead.status;
-            document.getElementById('modal-select-temperatura').value = lead.temperatura;
-            document.getElementById('modal-input-valor').value = lead.valor || '';
-            document.getElementById('modal-input-obs').value = lead.observacoes || '';
-
-            document.getElementById('modal-lead').classList.remove('hidden');
-        }
-
-        function fecharModalLead() {
-            document.getElementById('modal-lead').classList.add('hidden');
-            leadAtualId = null;
-            carregarLeads();
-        }
-
-        async function atualizarStatusLeadModal() {
-            if (!leadAtualId) return;
-            const novoStatus = document.getElementById('modal-select-status').value;
-
-            // Atualiza no Supabase
-            const { error } = await supabaseClient
-                .from('orcamentos')
-                .update({ status: novoStatus })
-                .eq('id', leadAtualId);
-
-            if (error) {
-                console.error('Erro ao atualizar status:', error.message);
-            } else {
-                const lead = leadsGlobais.find(l => l.id == leadAtualId);
-                if (lead) lead.status = novoStatus;
-                atualizarDashboard();
-                renderizarKanban();
-            }
-        }
-
-        function atualizarTemperaturaLeadModal() {
-            if (!leadAtualId) return;
-            const novaTemp = document.getElementById('modal-select-temperatura').value;
-            salvarMetaLead(leadAtualId, { temperatura: novaTemp });
-            const lead = leadsGlobais.find(l => l.id == leadAtualId);
-            if (lead) lead.temperatura = novaTemp;
-        }
-
-        function atualizarValorLeadModal() {
-            if (!leadAtualId) return;
-            const novoValor = Number(document.getElementById('modal-input-valor').value);
-            salvarMetaLead(leadAtualId, { valor: novoValor });
-            const lead = leadsGlobais.find(l => l.id == leadAtualId);
-            if (lead) lead.valor = novoValor;
-            atualizarDashboard();
-        }
-
-        function salvarObservacoesModal() {
-            if (!leadAtualId) return;
-            const obs = document.getElementById('modal-input-obs').value;
-            salvarMetaLead(leadAtualId, { observacoes: obs });
-            const lead = leadsGlobais.find(l => l.id == leadAtualId);
-            if (lead) lead.observacoes = obs;
-        }
-
-        // Integração WhatsApp Inteligente
-        function abrirWhatsApp(telefone, nome, servico, veiculo) {
-            const msg = `Olá, ${nome}! Tudo bem? Aqui é da Oásis Car Estética Automotiva. Recebi seu interesse em ${servico} para o seu ${veiculo} e gostaria de entender melhor o que você precisa.`;
-            const url = `https://api.whatsapp.com/send?phone=${numeroWhatsAppPadrao}&text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
-        }
-
-        function enviarZapTemplate(tipo) {
-            const lead = leadsGlobais.find(l => l.id == leadAtualId);
-            if (!lead) return;
-
-            let msg = '';
-            if (tipo === 1) {
-                msg = `Olá, ${lead.nome}! Tudo bem? Aqui é da Oásis Car Estética Automotiva em Ribeirão Preto. Vi que você demonstrou interesse em ${lead.servico} para o seu ${lead.veiculo}. Como podemos te ajudar hoje?`;
-            } else if (tipo === 2) {
-                msg = `Olá, ${lead.nome}! Preparamos uma proposta especial de ${lead.servico} para o seu ${lead.veiculo}. Podemos conversar sobre os detalhes?`;
-            } else if (tipo === 3) {
-                msg = `Olá, ${lead.nome}! Passando para saber se ficou alguma dúvida sobre o orçamento de ${lead.servico} do seu ${lead.veiculo}.`;
-            }
-
-            const url = `https://api.whatsapp.com/send?phone=${numeroWhatsAppPadrao}&text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
-        }
-
-        // Clientes e Relatórios
-        function renderizarClientes() {
-            const tbody = document.getElementById('tabela-clientes-body');
-            tbody.innerHTML = '';
-            const convertidos = leadsGlobais.filter(l => l.status === 'CONVERTIDOS');
-
-            if (convertidos.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-zinc-500">Nenhum cliente convertido ainda.</td></tr>`;
-                return;
-            }
-
-            convertidos.forEach(c => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-zinc-900/40 transition-colors";
-                tr.innerHTML = `
-                    <td class="p-4"><strong class="text-white">${c.nome}</strong><br><span class="text-zinc-400">${c.telefone}</span></td>
-                    <td class="p-4">${c.veiculo}</td>
-                    <td class="p-4">${c.servico}</td>
-                    <td class="p-4 font-semibold text-emerald-400">R$ ${Number(c.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                    <td class="p-4 text-right">
-                        <button onclick="abrirWhatsApp('${c.telefone}', '${c.nome}', '${c.servico}', '${c.veiculo}')" class="p-2 rounded-xl bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 transition-all"><i class="fa-brands fa-whatsapp"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function calcularRelatorios() {
-            const total = leadsGlobais.length;
-            const convertidos = leadsGlobais.filter(l => l.status === 'CONVERTIDOS').length;
-            const perdidos = leadsGlobais.filter(l => l.status === 'PERDIDOS').length;
-            const semResposta = leadsGlobais.filter(l => l.status === 'NOVO').length;
-            const taxa = total > 0 ? ((convertidos / total) * 100).toFixed(1) : 0;
-
-            let fatTotal = 0;
-            leadsGlobais.forEach(l => { if(l.status === 'CONVERTIDOS') fatTotal += Number(l.valor || 0); });
-            const ticketMedio = convertidos > 0 ? (fatTotal / convertidos) : 0;
-
-            document.getElementById('rel-total-leads').innerText = total;
-            document.getElementById('rel-total-convertidos').innerText = convertidos;
-            document.getElementById('rel-taxa-conv').innerText = `${taxa}%`;
-            document.getElementById('rel-ticket-medio').innerText = `R$ ${ticketMedio.toLocaleString('pt-BR', {maximumFractionDigits: 0})}`;
-            document.getElementById('rel-fat-potencial').innerText = `R$ ${fatTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('rel-perdidos').innerText = perdidos;
-            document.getElementById('rel-sem-resposta').innerText = semResposta;
-        }
-
-        function atualizarBadgeNotificacoes() {
-            const novos = leadsGlobais.filter(l => l.status === 'NOVO').length;
-            document.getElementById('notif-badge').innerText = novos;
-            if (novos > 0) {
-                document.getElementById('lista-notificacoes').innerHTML = `
-                    <div class="p-2 rounded-xl bg-zinc-900 border border-brand-border">
-                        <strong class="text-white block">Novos Leads Recebidos</strong>
-                        <span class="text-zinc-400">Existem ${novos} novos leads aguardando primeiro contato.</span>
-                    </div>
-                `;
-            }
-        }
-
-        function abrirModalNovoLead() {
-            alert('Para cadastrar novos leads manualmente ou via tráfego, utilize a landing page externa ou edite direto na tabela.');
-        }
-
-        function abrirModalFollowUp() {
-            alert('Sistema de follow-ups integrado com a timeline do lead.');
-        }
-    </script>
 </body>
 </html>
