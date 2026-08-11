@@ -1,796 +1,204 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oásis Car Estética - CRM & Leads</title>
-    <!-- Fonte Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome para ícones -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase JS Client -->
+    <title>Painel Administrativo | Oásis Car Estética</title>
+    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0a0a0a',
+                            card: '#141414',
+                            border: '#262626',
+                            accent: '#f59e0b',
+                            red: '#dc2626',
+                            grayText: '#a3a3a3'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        body {
-            background-color: #0c0c0e;
-            color: #f3f4f6;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* SIDEBAR */
-        aside {
-            width: 260px;
-            background-color: #121215;
-            border-right: 1px solid #1f1f23;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .brand-box {
-            padding: 24px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid #1f1f23;
-        }
-
-        .brand-logo {
-            width: 40px;
-            height: 40px;
-            background-color: #f59e0b;
-            color: #000;
-            font-weight: 700;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .brand-title h1 {
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: #fff;
-        }
-
-        .brand-title span {
-            font-size: 11px;
-            color: #f59e0b;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .menu-list {
-            padding: 16px 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .menu-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            color: #9ca3af;
-            text-decoration: none;
-            font-size: 13.5px;
-            font-weight: 500;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .menu-item:hover {
-            background-color: rgba(245, 158, 11, 0.08);
-            color: #f59e0b;
-        }
-
-        .menu-item.active {
-            background-color: rgba(245, 158, 11, 0.15);
-            color: #f59e0b;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .menu-item i {
-            font-size: 16px;
-            width: 20px;
-            text-align: center;
-        }
-
-        .badge-count {
-            margin-left: auto;
-            background-color: #ef4444;
-            color: #fff;
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-weight: 600;
-        }
-
-        .user-footer {
-            padding: 16px;
-            border-top: 1px solid #1f1f23;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background-color: #0f0f12;
-        }
-
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            background-color: #f59e0b;
-            color: #000;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 13px;
-        }
-
-        .user-info h4 {
-            font-size: 13px;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        .user-info span {
-            font-size: 11px;
-            color: #9ca3af;
-        }
-
-        /* MAIN CONTENT AREA */
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            background-color: #0c0c0e;
-        }
-
-        header.top-header {
-            padding: 20px 32px;
-            border-bottom: 1px solid #1f1f23;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #121215;
-        }
-
-        .header-title h2 {
-            font-size: 18px;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .header-title p {
-            font-size: 12.5px;
-            color: #9ca3af;
-            margin-top: 2px;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .status-badge {
-            background-color: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-badge::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background-color: #10b981;
-            border-radius: 50%;
-        }
-
-        .icon-btn {
-            background: #1a1a1e;
-            border: 1px solid #27272a;
-            color: #9ca3af;
-            width: 38px;
-            height: 38px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .icon-btn:hover {
-            border-color: #f59e0b;
-            color: #f59e0b;
-        }
-
-        /* CONTAINER BODY & SECTIONS */
-        .content-body {
-            padding: 32px;
-        }
-
-        .view-section {
-            display: none;
-        }
-
-        .view-section.active-view {
-            display: block;
-        }
-
-        /* FILTERS & SEARCH */
-        .filters-container {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-
-        .search-box {
-            flex: 1;
-            min-width: 280px;
-            background: #141417;
-            border: 1px solid #27272a;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            padding: 0 16px;
-            gap: 12px;
-        }
-
-        .search-box i {
-            color: #71717a;
-            font-size: 14px;
-        }
-
-        .search-box input {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 13px;
-            width: 100%;
-            padding: 12px 0;
-            outline: none;
-        }
-
-        .search-box input::placeholder {
-            color: #71717a;
-        }
-
-        .filter-select {
-            background: #141417;
-            border: 1px solid #27272a;
-            color: #e4e4e7;
-            padding: 0 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 500;
-            outline: none;
-            cursor: pointer;
-            height: 46px;
-        }
-
-        .btn-primary {
-            background-color: #f59e0b;
-            color: #000;
-            font-weight: 700;
-            padding: 0 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            height: 46px;
-            transition: background 0.2s;
-        }
-
-        .btn-primary:hover {
-            background-color: #d97706;
-        }
-
-        /* TABLE */
-        .table-card {
-            background: #121215;
-            border: 1px solid #1f1f23;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            background: #18181b;
-            color: #9ca3af;
-            font-size: 11.5px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 14px 20px;
-            border-bottom: 1px solid #27272a;
-        }
-
-        td {
-            padding: 16px 20px;
-            border-bottom: 1px solid #1f1f23;
-            font-size: 13.5px;
-            color: #e4e4e7;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover td {
-            background-color: rgba(255, 255, 255, 0.015);
-        }
-
-        .client-name {
-            font-weight: 600;
-            color: #fff;
-            display: block;
-        }
-
-        .client-phone {
-            font-size: 12px;
-            color: #9ca3af;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            margin-top: 3px;
-        }
-
-        .client-phone i {
-            color: #10b981;
-        }
-
-        .temperature-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12.5px;
-            font-weight: 600;
-            color: #fbbf24;
-        }
-
-        .temperature-badge::before {
-            content: '';
-            width: 8px;
-            height: 8px;
-            background-color: #fbbf24;
-            border-radius: 50%;
-        }
-
-        .status-tag {
-            background: rgba(245, 158, 11, 0.1);
-            color: #f59e0b;
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 11.5px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .actions-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        .action-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #1a1a1e;
-            border: 1px solid #27272a;
-            color: #a1a1aa;
-            cursor: pointer;
-            transition: 0.2s;
-            text-decoration: none;
-        }
-
-        .action-icon.whatsapp:hover {
-            background: rgba(16, 185, 129, 0.15);
-            border-color: #10b981;
-            color: #10b981;
-        }
-
-        .action-icon.view:hover {
-            background: rgba(245, 158, 11, 0.15);
-            border-color: #f59e0b;
-            color: #f59e0b;
-        }
-
-        /* CARD DE CONTEÚDO GENÉRICO PARA OUTRAS ABAS */
-        .generic-card {
-            background: #121215;
-            border: 1px solid #1f1f23;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .generic-card h3 {
-            font-size: 20px;
-            color: #fff;
-            margin-bottom: 10px;
-        }
-
-        .generic-card p {
-            color: #9ca3af;
-            font-size: 14px;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; color: #ffffff; }
     </style>
 </head>
-<body>
+<body class="bg-[#0a0a0a] text-white antialiased min-h-screen p-4 sm:p-8">
 
-    <!-- SIDEBAR -->
-    <aside>
-        <div>
-            <div class="brand-box">
-                <div class="brand-logo">O</div>
-                <div class="brand-title">
-                    <h1>OÁSIS CAR</h1>
-                    <span>CRM ESTÉTICA</span>
-                </div>
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- HEADER DO PAINEL -->
+        <header class="bg-[#141414] border border-[#262626] rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight text-amber-500">Oásis Car Estética</h1>
+                <p class="text-xs text-brand-grayText mt-1">Painel de Gestão de Leads e Orçamentos - Ribeirão Preto</p>
             </div>
-            
-            <div class="menu-list">
-                <a class="menu-item" data-view="dashboard"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
-                <a class="menu-item active" data-view="leads"><i class="fa-solid fa-users-gear"></i> Leads & CRM</a>
-                <a class="menu-item" data-view="funil"><i class="fa-solid fa-filter"></i> Funil de Vendas</a>
-                <a class="menu-item" data-view="followups"><i class="fa-solid fa-clock-rotate-left"></i> Follow-ups <span class="badge-count" id="badge-followup">0</span></a>
-                <a class="menu-item" data-view="agenda"><i class="fa-solid fa-calendar-days"></i> Agenda</a>
-                <a class="menu-item" data-view="clientes"><i class="fa-solid fa-user-group"></i> Clientes</a>
-                <a class="menu-item" data-view="relatorios"><i class="fa-solid fa-chart-line"></i> Relatórios</a>
-                <a class="menu-item" data-view="config"><i class="fa-solid fa-gear"></i> Configurações</a>
-            </div>
-        </div>
-
-        <div class="user-footer">
-            <div class="user-avatar">OA</div>
-            <div class="user-info">
-                <h4>Admin Oásis Car</h4>
-                <span>ribeiraopreto@oasiscar.com</span>
-            </div>
-        </div>
-    </aside>
-
-    <!-- MAIN INTERFACE -->
-    <main>
-        <header class="top-header">
-            <div class="header-title">
-                <h2 id="page-title">Leads & CRM</h2>
-                <p id="page-subtitle">Gerenciamento inteligente de leads e conversão - Ribeirão Preto</p>
-            </div>
-            <div class="header-actions">
-                <div class="status-badge">Sistema Online</div>
-                <button class="icon-btn" onclick="carregarLeadsSupabase()" title="Atualizar dados"><i class="fa-solid fa-rotate"></i></button>
-                <button class="icon-btn" title="Notificações"><i class="fa-regular fa-bell"></i></button>
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-800/60 text-emerald-400 text-xs font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistema Online
+                </span>
+                <button onclick="carregarLeads()" class="bg-[#262626] hover:bg-neutral-800 text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-rotate"></i> Atualizar
+                </button>
             </div>
         </header>
 
-        <div class="content-body">
+        <!-- CONTEÚDO PRINCIPAL -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- VIEW: LEADS & CRM -->
-            <div id="view-leads" class="view-section active-view">
-                <div class="filters-container">
-                    <div class="search-box">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" id="searchInput" placeholder="PESQUISAR CLIENTE, TELEFONE OU VEÍCULO...">
-                    </div>
-
-                    <select class="filter-select" id="statusFilter">
-                        <option value="">TODOS OS STATUS</option>
-                        <option value="NOVO">Novo</option>
-                        <option value="EM_CONTATO">Em Contato</option>
-                        <option value="AGENDADO">Agendado</option>
-                        <option value="CONCLUIDO">Concluído</option>
-                    </select>
-
-                    <select class="filter-select" id="tempFilter">
-                        <option value="">TODAS TEMPERATURAS</option>
-                        <option value="QUENTE">Quente</option>
-                        <option value="MORNO">Morno</option>
-                        <option value="FRIO">Frio</option>
-                    </select>
-
-                    <button class="btn-primary" onclick="abrirModalNovoLead()">
-                        <i class="fa-solid fa-plus"></i> NOVO LEAD
-                    </button>
+            <!-- TABELA DE LEADS RECENTES -->
+            <div class="lg:col-span-2 bg-[#141414] border border-[#262626] rounded-2xl p-6 shadow-xl flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg font-bold">Leads Recentes</h2>
+                    <span id="contadorLeads" class="text-xs bg-[#262626] px-2.5 py-1 rounded-full text-brand-grayText">0 leads</span>
                 </div>
 
-                <div class="table-card">
-                    <table>
+                <div class="overflow-x-auto flex-1">
+                    <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr>
-                                <th>Cliente / Contato</th>
-                                <th>Veículo</th>
-                                <th>Serviço</th>
-                                <th>Temperatura / Score</th>
-                                <th>Status</th>
-                                <th>Valor Est.</th>
-                                <th>Ações</th>
+                            <tr class="border-b border-[#262626] text-xs text-brand-grayText uppercase tracking-wider">
+                                <th class="pb-3 font-semibold">Cliente</th>
+                                <th class="pb-3 font-semibold">Veículo</th>
+                                <th class="pb-3 font-semibold">Serviço</th>
+                                <th class="pb-3 font-semibold">Status</th>
+                                <th class="pb-3 font-semibold text-right">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="leadsTableBody">
-                            <!-- Inserido dinamicamente pelo Supabase -->
+                        <tbody id="tabelaLeads" class="divide-y divide-[#262626]/50 text-sm">
                             <tr>
-                                <td colspan="7" style="text-align: center; color: #71717a; padding: 30px;">Carregando leads do Supabase...</td>
+                                <td colspan="5" class="py-8 text-center text-brand-grayText">Carregando leads...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- VIEW: DASHBOARD -->
-            <div id="view-dashboard" class="view-section">
-                <div class="generic-card">
-                    <h3>Dashboard Geral</h3>
-                    <p>Métricas de conversão, faturamento e atendimento em tempo real para Ribeirão Preto.</p>
+            <!-- CALCULADORA DE ORÇAMENTO -->
+            <div class="bg-[#141414] border border-[#262626] rounded-2xl p-6 shadow-xl space-y-4">
+                <h2 class="text-lg font-bold mb-4">Calculadora de Orçamento</h2>
+                
+                <div>
+                    <label class="block text-xs text-brand-grayText mb-1">Valor do Serviço (R$)</label>
+                    <input type="number" id="valServico" placeholder="0,00" oninput="calcularOrcamento()"
+                        class="w-full bg-[#1c1c1c] border border-[#262626] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
                 </div>
-            </div>
 
-            <!-- VIEW: FUNIL DE VENDAS -->
-            <div id="view-funil" class="view-section">
-                <div class="generic-card">
-                    <h3>Funil de Vendas Kanban</h3>
-                    <p>Gerencie o avanço dos clientes entre Prospecção, Orçamento Enviado e Fechamento.</p>
+                <div>
+                    <label class="block text-xs text-brand-grayText mb-1">Desconto (R$)</label>
+                    <input type="number" id="valDesconto" placeholder="0,00" oninput="calcularOrcamento()"
+                        class="w-full bg-[#1c1c1c] border border-[#262626] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
                 </div>
-            </div>
 
-            <!-- VIEW: FOLLOW-UPS -->
-            <div id="view-followups" class="view-section">
-                <div class="generic-card">
-                    <h3>Central de Follow-ups</h3>
-                    <p>Lista de clientes que aguardam retorno para fechamento de serviços estéticos.</p>
-                </div>
-            </div>
-
-            <!-- VIEW: AGENDA -->
-            <div id="view-agenda" class="view-section">
-                <div class="generic-card">
-                    <h3>Agenda de Atendimentos</h3>
-                    <p>Controle diário e semanal dos veículos agendados na Oásis Car Estética.</p>
-                </div>
-            </div>
-
-            <!-- VIEW: CLIENTES -->
-            <div id="view-clientes" class="view-section">
-                <div class="generic-card">
-                    <h3>Base de Clientes</h3>
-                    <p>Histórico completo de clientes cadastrados, carros e serviços realizados.</p>
-                </div>
-            </div>
-
-            <!-- VIEW: RELATÓRIOS -->
-            <div id="view-relatorios" class="view-section">
-                <div class="generic-card">
-                    <h3>Relatórios Financeiros</h3>
-                    <p>Faturamento, ticket médio e serviços mais procurados na região.</p>
-                </div>
-            </div>
-
-            <!-- VIEW: CONFIGURAÇÕES -->
-            <div id="view-config" class="view-section">
-                <div class="generic-card">
-                    <h3>Configurações do Sistema</h3>
-                    <p>Credenciais do Supabase, parâmetros de WhatsApp e dados da empresa.</p>
+                <div class="pt-4 border-t border-[#262626]">
+                    <span class="block text-xs text-brand-grayText mb-1">Valor Final Sugerido</span>
+                    <div id="valorFinal" class="text-3xl font-extrabold text-amber-500">R$ 0,00</div>
                 </div>
             </div>
 
         </div>
-    </main>
 
-  <script>
-    // ==========================================
-    // CONFIGURAÇÃO DO SUPABASE (BLINDADA)
-    // ==========================================
-    const SUPABASE_URL = 'https://pyodkkcmuoqrsnnifdqf.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_9jxs8Rc9L6BDNTvpT8fQ_A_dQSjuSHd';
+    </div>
 
-    if (typeof window.supabaseClient === 'undefined') {
-        window.supabaseClient = null;
+    <script>
+        // CONFIGURAÇÃO SUPABASE
+        const SUPABASE_URL = 'https://pyodkkcmuoqrsnnifdqf.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_9jxs8Rc9L6BDNTvpT8fQ_A_dQSjuSHd';
+        
+        // Inicializa o cliente apenas se o supabase estiver carregado
+        let supabaseClient;
         try {
-            window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         } catch (e) {
-            console.error("Erro ao inicializar Supabase:", e);
-        }
-    }
-    const supabaseClient = window.supabaseClient;
-
-    let cacheLeads = [];
-
-    async function carregarLeadsSupabase() {
-        if (!supabaseClient || SUPABASE_URL.includes('SUA-URL')) {
-            // Dados de exemplo caso as chaves ainda não tenham sido configuradas
-            cacheLeads = [
-                {
-                    id: 1,
-                    client_name: 'GUSTAVO HENRIQUE',
-                    phone: '(16) 99140-8438',
-                    vehicle: 'PORSCHE (2013) - BRANCO',
-                    service: 'HIGIENIZAÇÃO INTERNA',
-                    temperature: 'MORNO',
-                    score: 50,
-                    status: 'NOVO',
-                    estimated_value: 0
-                },
-                {
-                    id: 2,
-                    client_name: 'JOSE HENRIQUE',
-                    phone: '(16) 99140-8438',
-                    vehicle: 'HONDA (2020) - PRETO',
-                    service: 'VITRIFICAÇÃO',
-                    temperature: 'MORNO',
-                    score: 50,
-                    status: 'NOVO',
-                    estimated_value: 0
-                }
-            ];
-            renderizarTabela(cacheLeads);
-            return;
+            console.error("Erro ao iniciar Supabase:", e);
         }
 
-        try {
-            const { data, error } = await supabaseClient
-                .from('leads')
-                .select('*')
-                .order('created_at', { ascending: false });
+        const meuNumeroWhatsApp = '5516991408438';
 
-            if (error) throw error;
-            cacheLeads = data || [];
-            renderizarTabela(cacheLeads);
-        } catch (err) {
-            console.error("Erro ao carregar leads do Supabase:", err);
-        }
-    }
-
-    function renderizarTabela(leads) {
-        const tbody = document.getElementById('leadsTableBody');
-        if (!tbody) return;
-        tbody.innerHTML = '';
-
-        if (!leads || leads.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #71717a; padding: 30px;">Nenhum lead encontrado.</td></tr>`;
-            return;
-        }
-
-        leads.forEach(lead => {
-            const tr = document.createElement('tr');
-            const cleanPhone = lead.phone ? lead.phone.replace(/\D/g, '') : '';
+        async function carregarLeads() {
+            const tabelaBody = document.getElementById('tabelaLeads');
+            const contadorLeads = document.getElementById('contadorLeads');
             
-            tr.innerHTML = `
-                <td>
-                    <span class="client-name">${lead.client_name || 'CLIENTE'}</span>
-                    <span class="client-phone"><i class="fa-brands fa-whatsapp"></i> ${lead.phone || ''}</span>
-                </td>
-                <td>${lead.vehicle || 'N/I'}</td>
-                <td style="font-weight: 500;">${lead.service || 'ESTÉTICA AUTOMOTIVA'}</td>
-                <td>
-                    <div class="temperature-badge">${lead.temperature || 'MORNO'}</div>
-                    <div style="font-size: 11px; color: #71717a; margin-top: 2px;">SCORE: ${lead.score || 50}</div>
-                </td>
-                <td><span class="status-tag">${lead.status || 'NOVO'}</span></td>
-                <td style="font-weight: 600; color: #10b981;">R$ ${(lead.estimated_value || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                <td>
-                    <div class="actions-group">
-                        <a href="https://wa.me/55${cleanPhone}" target="_blank" class="action-icon whatsapp" title="Abrir WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-                        <a href="#" class="action-icon view" title="Visualizar Detalhes"><i class="fa-regular fa-eye"></i></a>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    // ==========================================
-    // NAVEGAÇÃO ENTRE ABAS DA SIDEBAR
-    // ==========================================
-    const menuItems = document.querySelectorAll('.menu-item');
-    const viewSections = document.querySelectorAll('.view-section');
-    const pageTitle = document.getElementById('page-title');
-    const pageSubtitle = document.getElementById('page-subtitle');
-
-    const metadataPages = {
-        'dashboard': { title: 'Dashboard', subtitle: 'Visão geral do desempenho e métricas - Ribeirão Preto' },
-        'leads': { title: 'Leads & CRM', subtitle: 'Gerenciamento inteligente de leads e conversão - Ribeirão Preto' },
-        'funil': { title: 'Funil de Vendas', subtitle: 'Acompanhamento das etapas do pipeline de atendimento' },
-        'followups': { title: 'Follow-ups', subtitle: 'Contatos pendentes e retornos agendados com clientes' },
-        'agenda': { title: 'Agenda', subtitle: 'Agendamentos e horários na Oásis Car Estética' },
-        'clientes': { title: 'Clientes', subtitle: 'Histórico de clientes cadastrados e veículos' },
-        'relatorios': { title: 'Relatórios', subtitle: 'Análise financeira e conversão de vendas' },
-        'config': { title: 'Configurações', subtitle: 'Ajustes do sistema, integrações e Supabase' }
-    };
-
-    menuItems.forEach(item => {
-        item.addEventListener('click', () => {
-            const viewName = item.getAttribute('data-view');
-            
-            menuItems.forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-
-            viewSections.forEach(sec => sec.classList.remove('active-view'));
-            const targetView = document.getElementById('view-' + viewName);
-            if (targetView) targetView.classList.add('active-view');
-
-            if(metadataPages[viewName] && pageTitle && pageSubtitle) {
-                pageTitle.textContent = metadataPages[viewName].title;
-                pageSubtitle.textContent = metadataPages[viewName].subtitle;
+            if (!supabaseClient) {
+                tabelaBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-red-500">Erro: Supabase não carregou.</td></tr>';
+                return;
             }
-        });
-    });
 
-    // Filtragem em tempo real
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const termo = e.target.value.toLowerCase();
-            const filtrados = cacheLeads.filter(l => 
-                (l.client_name && l.client_name.toLowerCase().includes(termo)) ||
-                (l.phone && l.phone.toLowerCase().includes(termo)) ||
-                (l.vehicle && l.vehicle.toLowerCase().includes(termo))
-            );
-            renderizarTabela(filtrados);
-        });
-    }
+            tabelaBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-brand-grayText">Carregando dados...</td></tr>';
 
-    function abrirModalNovoLead() {
-        alert('Funcionalidade de cadastro manual de lead ativada.');
-    }
+            try {
+                const { data, error } = await supabaseClient
+                    .from('orcamentos') // Mantido a tabela 'orcamentos' como você pediu
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-    // Inicialização ao carregar a página
-    window.addEventListener('DOMContentLoaded', () => {
-        carregarLeadsSupabase();
+                if (error) {
+                    console.error("Erro na consulta:", error);
+                    tabelaBody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-red-500">Erro na tabela: ${error.message}</td></tr>`;
+                    return;
+                }
 
-        // Configurar Realtime do Supabase para atualizar automaticamente quando cair lead do formulário
-        if (supabaseClient && !SUPABASE_URL.includes('SUA-URL')) {
-            supabaseClient
-                .channel('public:leads')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, payload => {
-                    carregarLeadsSupabase();
-                })
-                .subscribe();
+                tabelaBody.innerHTML = '';
+                contadorLeads.innerText = `${data.length} lead${data.length === 1 ? '' : 's'}`;
+
+                if (data.length === 0) {
+                    tabelaBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-brand-grayText">Nenhum orçamento pendente.</td></tr>';
+                    return;
+                }
+
+                data.forEach(item => {
+                    const nome = item.nome || 'Cliente';
+                    const veiculo = item.veiculo || 'Não informado';
+                    const servico = item.servico || 'Não informado';
+                    const status = item.status || 'NOVO';
+
+                    const textoZap = `Olá ${nome}, vi seu pedido de orçamento para o serviço de ${servico} no veículo ${veiculo} na Oásis Car Estética. Vamos conversar?`;
+                    const linkZap = `https://api.whatsapp.com/send?phone=${meuNumeroWhatsApp}&text=${encodeURIComponent(textoZap)}`;
+
+                    const row = `
+                        <tr class="hover:bg-[#1c1c1c]/50 transition-colors">
+                            <td class="py-3 font-medium">${nome}</td>
+                            <td class="py-3 text-brand-grayText">${veiculo}</td>
+                            <td class="py-3 text-brand-grayText">${servico}</td>
+                            <td class="py-3">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                    ${status}
+                                </span>
+                            </td>
+                            <td class="py-3 text-right">
+                                <a href="${linkZap}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1 font-semibold">
+                                    <i class="fa-brands fa-whatsapp"></i> Contato
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                    tabelaBody.innerHTML += row;
+                });
+            } catch (err) {
+                console.error('Erro:', err.message);
+                tabelaBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-red-500">Erro inesperado ao carregar dados.</td></tr>';
+            }
         }
-    });
-</script>
+
+        function calcularOrcamento() {
+            const servico = parseFloat(document.getElementById('valServico').value) || 0;
+            const desconto = parseFloat(document.getElementById('valDesconto').value) || 0;
+            let final = servico - desconto;
+            if (final < 0) final = 0;
+            document.getElementById('valorFinal').innerText = 'R$ ' + final.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // Carrega ao iniciar
+        carregarLeads();
+    </script>
 </body>
 </html>
