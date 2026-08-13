@@ -25,7 +25,7 @@
         </div>
         
         <div class="space-y-2 flex-1">
-            <button onclick="changeView('leads')" class="w-full text-left p-3 rounded-xl bg-neutral-900 border border-neutral-800 text-amber-500 font-bold transition-all">
+            <button class="w-full text-left p-3 rounded-xl bg-neutral-900 border border-neutral-800 text-amber-500 font-bold transition-all">
                 <i class="fa-solid fa-users mr-3"></i> Leads & Orçamentos
             </button>
             <button class="w-full text-left p-3 rounded-xl hover:bg-neutral-900 text-neutral-500 hover:text-white transition-all">
@@ -54,7 +54,7 @@
         <!-- CARDS DE ESTATÍSTICA -->
         <div class="grid grid-cols-3 gap-6 mb-8">
             <div class="card-glass p-6 rounded-3xl">
-                <h3 class="text-neutral-500 text-sm">Leads Hoje</h3>
+                <h3 class="text-neutral-500 text-sm">Total de Leads</h3>
                 <p class="text-4xl font-bold mt-2" id="totalLeads">0</p>
             </div>
             <div class="card-glass p-6 rounded-3xl">
@@ -68,6 +68,7 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="text-neutral-500 uppercase text-xs tracking-widest border-b border-neutral-800">
+                        <th class="pb-4">Data / Hora</th>
                         <th class="pb-4">Cliente</th>
                         <th class="pb-4">Veículo</th>
                         <th class="pb-4">Serviço</th>
@@ -92,16 +93,16 @@
 
         async function carregarLeads() {
             const tbody = document.getElementById('tabelaLeads');
-            tbody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-neutral-500">Carregando CRM...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="py-10 text-center text-neutral-500">Carregando CRM...</td></tr>';
 
-            // BUSCANDO DA TABELA CORRETA: pistas
+            // BUSCANDO DA TABELA 'pista' E ORDENANDO POR 'criado_em'
             const { data, error } = await supabaseClient
-                .from('pistas')
+                .from('pista')
                 .select('*')
-                .order('created_at', { ascending: false });
+                .order('criado_em', { ascending: false });
 
             if (error) {
-                tbody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-red-500">Erro na conexão.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="py-10 text-center text-red-500">Erro ao carregar do banco.</td></tr>';
                 return;
             }
 
@@ -110,9 +111,21 @@
             
             data.forEach(item => {
                 const tr = document.createElement('tr');
-                const linkZap = `https://wa.me/${meuNumeroWhatsApp}?text=${encodeURIComponent(`Olá ${item.nome}, vi seu orçamento para ${item.servico}...`)}`;
+                
+                // Formatando a data e hora para o padrão brasileiro
+                let dataFormatada = '-';
+                if (item.criado_em) {
+                    const dataObj = new Date(item.criado_em);
+                    dataFormatada = dataObj.toLocaleString('pt-BR', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+                }
+
+                const linkZap = `https://wa.me/${meuNumeroWhatsApp}?text=${encodeURIComponent(`Olá ${item.nome}, vi seu interesse no serviço de ${item.servico} para o ${item.veiculo}...`)}`;
                 
                 tr.innerHTML = `
+                    <td class="py-5 text-neutral-400 text-sm">${dataFormatada}</td>
                     <td class="py-5 font-medium">${item.nome}</td>
                     <td class="py-5 text-neutral-400">${item.veiculo}</td>
                     <td class="py-5 text-neutral-400">${item.servico}</td>
