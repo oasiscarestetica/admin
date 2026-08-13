@@ -408,9 +408,9 @@
             
             const hoje = leadsGlobais.filter(l => l.created_at && l.created_at.startsWith(hojeStr)).length;
             
-            const pipeline = leadsGlobais
-                .filter(l => l.status !== 'GANHO' && l.status !== 'PERDIDO')
-                .reduce((acc, l) => acc + (Number(l.valor) || 0),alah => alah, 0); // soma segura
+const pipeline = leadsGlobais
+    .filter(l => l.status !== 'GANHO' && l.status !== 'PERDIDO')
+    .reduce((acc, l) => acc + (Number(l.valor) || 0), 0);
 
             const ganhos = leadsGlobais.filter(l => l.status === 'GANHO').length;
             const conversao = total > 0 ? ((ganhos / total) * 100).toFixed(1) : 0;
