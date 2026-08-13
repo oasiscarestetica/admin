@@ -514,7 +514,9 @@ const pipeline = leadsGlobais
                 `;
             });
         }
-
+// Data e hora do agendamento.
+document.getElementById('editDataAgendamento').value = lead.data_agendamento ? lead.data_agendamento.slice(0, 16) : '';
+        
         // RENDERIZAR DASHBOARD RECENTES
         function renderizarDashboardRecorrentes() {
             const container = document.getElementById('tabelaDashboardRecorrentes');
