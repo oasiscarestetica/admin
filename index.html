@@ -8,7 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Estilo para garantir que o layout premium apareça */
         body { background-color: #050505; color: white; font-family: 'Inter', sans-serif; }
         .sidebar-gradient { background: linear-gradient(180deg, #141414 0%, #0a0a0a 100%); }
         .card-glass { background: rgba(20, 20, 20, 0.7); backdrop-filter: blur(10px); border: 1px solid #262626; }
@@ -95,8 +94,9 @@
             const tbody = document.getElementById('tabelaLeads');
             tbody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-neutral-500">Carregando CRM...</td></tr>';
 
+            // BUSCANDO DA TABELA CORRETA: pistas
             const { data, error } = await supabaseClient
-                .from('orcamentos')
+                .from('pistas')
                 .select('*')
                 .order('created_at', { ascending: false });
 
