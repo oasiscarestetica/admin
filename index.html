@@ -79,7 +79,7 @@
             if (error) {
                 alert('Erro ao excluir: ' + error.message);
             } else {
-                carregarLeads(); // Atualiza a tabela na hora
+                carregarLeads();
             }
         }
 
@@ -87,13 +87,14 @@
             const tbody = document.getElementById('tabelaLeads');
             tbody.innerHTML = '<tr><td colspan="6" class="py-10 text-center text-neutral-500">Carregando CRM...</td></tr>';
 
+            // BUSCANDO DA TABELA 'pistas' USANDO 'created_at'
             const { data, error } = await supabaseClient
                 .from('pistas')
                 .select('*')
-                .order('criado_em', { ascending: false });
+                .order('created_at', { ascending: false });
 
             if (error) {
-                tbody.innerHTML = '<tr><td colspan="6" class="py-10 text-center text-red-500">Erro: ' + error.message + '</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="6" class="py-10 text-center text-red-500">Erro: ${error.message}</td></tr>`;
                 return;
             }
 
@@ -103,8 +104,8 @@
                 const tr = document.createElement('tr');
                 
                 let dataFormatada = '-';
-                if (item.criado_em) {
-                    const dataObj = new Date(item.criado_em);
+                if (item.created_at) {
+                    const dataObj = new Date(item.created_at);
                     dataFormatada = dataObj.toLocaleString('pt-BR', {
                         day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
                     });
