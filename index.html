@@ -3,136 +3,826 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oásis Car | CRM Premium</title>
+    <title>Oásis Car | CRM Premium SaaS</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#050505',
+                        cardDark: '#121214',
+                        cardBorder: '#222226',
+                        brandAmber: '#f59e0b',
+                        brandAmberHover: '#d97706',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { background-color: #050505; color: white; font-family: 'Inter', sans-serif; }
-        .sidebar-gradient { background: linear-gradient(180deg, #141414 0%, #0a0a0a 100%); }
-        .card-glass { background: rgba(20, 20, 20, 0.7); backdrop-filter: blur(10px); border: 1px solid #262626; }
+        body { background-color: #050505; color: #f4f4f5; font-family: 'Inter', sans-serif; }
+        .glass-panel { background: rgba(18, 18, 20, 0.75); backdrop-filter: blur(12px); border: 1px solid #222226; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #09090b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+        @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .toast-animate { animation: slideIn 0.3s ease-out forwards; }
     </style>
 </head>
-<body class="flex h-screen">
+<body class="flex h-screen overflow-hidden">
 
-    <!-- MENU LATERAL -->
-    <nav class="sidebar-gradient w-64 border-r border-neutral-800 p-6 flex flex-col">
-        <div class="mb-10 text-amber-500 font-extrabold text-2xl tracking-tighter">
-            OÁSIS CAR <span class="text-white text-xs block font-light tracking-widest">CRM PREMIUM</span>
-        </div>
-        
-        <div class="space-y-2 flex-1">
-            <button class="w-full text-left p-3 rounded-xl bg-neutral-900 border border-neutral-800 text-amber-500 font-bold transition-all">
-                <i class="fa-solid fa-users mr-3"></i> Leads & Orçamentos
+    <!-- SIDEBAR PREMIUM -->
+    <aside id="sidebar" class="w-64 bg-darkBg border-r border-cardBorder flex flex-col transition-all duration-300 z-30">
+        <div class="p-6 border-b border-cardBorder flex items-center justify-between">
+            <div>
+                <span class="text-brandAmber font-black text-xl tracking-tight block">OÁSIS CAR</span>
+                <span class="text-zinc-400 text-[10px] uppercase tracking-widest font-semibold">CRM Premium v2.5</span>
+            </div>
+            <button onclick="toggleSound()" id="soundToggleBtn" class="text-zinc-400 hover:text-brandAmber transition" title="Ativar/Desativar Som">
+                <i class="fa-solid fa-volume-high text-sm"></i>
             </button>
         </div>
-    </nav>
+
+        <nav class="flex-1 p-4 space-y-1.5 overflow-y-auto custom-scrollbar">
+            <button onclick="mudarAba('dashboard')" class="nav-btn w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition bg-brandAmber text-black font-bold shadow-lg shadow-amber-500/10" data-tab="dashboard">
+                <i class="fa-solid fa-chart-pie w-5 mr-3"></i> Dashboard
+            </button>
+            <button onclick="mudarAba('leads')" class="nav-btn w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition text-zinc-400 hover:text-white hover:bg-zinc-900" data-tab="leads">
+                <i class="fa-solid fa-users w-5 mr-3"></i> Leads & Orçamentos
+            </button>
+            <button onclick="mudarAba('kanban')" class="nav-btn w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition text-zinc-400 hover:text-white hover:bg-zinc-900" data-tab="kanban">
+                <i class="fa-solid fa-fire w-5 mr-3"></i> Funil de Vendas
+            </button>
+            <button onclick="mudarAba('agenda')" class="nav-btn w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition text-zinc-400 hover:text-white hover:bg-zinc-900" data-tab="agenda">
+                <i class="fa-solid fa-calendar-days w-5 mr-3"></i> Agenda
+            </button>
+            <button onclick="mudarAba('clientes')" class="nav-btn w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition text-zinc-400 hover:text-white hover:bg-zinc-900" data-tab="clientes">
+                <i class="fa-solid fa-trophy w-5 mr-3"></i> Clientes Ganhos
+            </button>
+            <button onclick="mudarAba('perdidos')" class="nav-btn w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition text-zinc-400 hover:text-white hover:bg-zinc-900" data-tab="perdidos">
+                <i class="fa-solid fa-ban w-5 mr-3"></i> Leads Perdidos
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-cardBorder">
+            <div class="flex items-center space-x-3 bg-zinc-900/50 p-3 rounded-xl border border-cardBorder">
+                <div class="w-8 h-8 rounded-full bg-brandAmber/20 flex items-center justify-center text-brandAmber font-bold text-xs">OC</div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold truncate">Oásis Car Estética</p>
+                    <p class="text-[10px] text-emerald-400 flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1.5"></span> Sistema Online</p>
+                </div>
+            </div>
+        </div>
+    </aside>
 
     <!-- CONTEÚDO PRINCIPAL -->
-    <main class="flex-1 p-8 overflow-y-auto">
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-darkBg">
         
-        <header class="flex justify-between items-center mb-8">
-            <div>
-                <h1 class="text-3xl font-bold">Gestão de Orçamentos</h1>
-                <p class="text-neutral-500">Acompanhamento de leads em tempo real.</p>
+        <!-- HEADER SUPERIOR -->
+        <header class="h-20 border-b border-cardBorder px-8 flex items-center justify-between glass-panel z-20">
+            <div class="flex items-center space-x-4">
+                <h1 id="tituloPagina" class="text-xl font-bold tracking-tight">Dashboard Executivo</h1>
+                <span id="badgeContador" class="bg-zinc-800 text-zinc-300 px-2.5 py-0.5 rounded-full text-xs font-semibold">0 leads</span>
             </div>
-            <button onclick="carregarLeads()" class="bg-amber-500 text-black px-6 py-2 rounded-full font-bold hover:bg-amber-400 transition-all">
-                <i class="fa-solid fa-sync mr-2"></i> Atualizar Dados
-            </button>
+            
+            <div class="flex items-center space-x-4">
+                <div class="relative hidden md:block">
+                    <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-xs"></i>
+                    <input type="text" id="inputBusca" oninput="filtrarLeads()" placeholder="Buscar por cliente, veículo ou serviço..." class="bg-zinc-900/80 border border-cardBorder text-sm rounded-xl pl-10 pr-4 py-2 w-72 focus:outline-none focus:border-brandAmber transition">
+                </div>
+                
+                <button onclick="carregarLeads()" class="bg-brandAmber hover:bg-brandAmberHover text-black px-5 py-2 rounded-xl text-sm font-bold transition flex items-center shadow-lg shadow-amber-500/10">
+                    <i class="fa-solid fa-sync mr-2" id="syncIcon"></i> Atualizar Dados
+                </button>
+            </div>
         </header>
 
-        <!-- TABELA DE CRM -->
-        <div class="card-glass rounded-3xl p-6">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="text-neutral-500 uppercase text-xs tracking-widest border-b border-neutral-800">
-                        <th class="pb-4">Data / Hora</th>
-                        <th class="pb-4">Cliente</th>
-                        <th class="pb-4">Veículo</th>
-                        <th class="pb-4">Serviço</th>
-                        <th class="pb-4">Status</th>
-                        <th class="pb-4 text-right">Ação</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelaLeads" class="divide-y divide-neutral-800">
-                    <!-- Dinâmico -->
-                </tbody>
-            </table>
+        <!-- ÁREA DE ABAS -->
+        <div class="flex-1 overflow-y-auto p-8 custom-scrollbar relative" id="conteudoPrincipal">
+            
+            <!-- ABA 1: DASHBOARD -->
+            <div id="tab-dashboard" class="space-y-6">
+                <!-- Cards de Métricas -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-brandAmber">
+                        <p class="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Total de Leads</p>
+                        <h3 id="m-total" class="text-3xl font-extrabold mt-2">0</h3>
+                        <p class="text-zinc-500 text-xs mt-1">Registrados na base</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-blue-500">
+                        <p class="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Leads Hoje</p>
+                        <h3 id="m-hoje" class="text-3xl font-extrabold mt-2">0</h3>
+                        <p class="text-zinc-500 text-xs mt-1">Capturados nas últimas 24h</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-emerald-500">
+                        <p class="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Pipeline Potencial</p>
+                        <h3 id="m-pipeline" class="text-3xl font-extrabold mt-2">R$ 0,00</h3>
+                        <p class="text-zinc-500 text-xs mt-1">Soma de orçamentos ativos</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-purple-500">
+                        <p class="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Taxa de Conversão</p>
+                        <h3 id="m-conversao" class="text-3xl font-extrabold mt-2">0%</h3>
+                        <p class="text-zinc-500 text-xs mt-1">Clientes ganhos / Total</p>
+                    </div>
+                </div>
+
+                <!-- Acesso rápido & Resumo -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 glass-panel rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-lg font-bold flex items-center"><i class="fa-solid fa-bolt text-brandAmber mr-2"></i> Últimos Leads Capturados</h2>
+                            <button onclick="mudarAba('leads')" class="text-xs text-brandAmber hover:underline font-semibold">Ver todos</button>
+                        </div>
+                        <div id="tabelaDashboardRecorrentes" class="space-y-3">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-2xl p-6 flex flex-col justify-between">
+                        <div>
+                            <h2 class="text-lg font-bold mb-4 flex items-center"><i class="fa-solid fa-chart-line text-emerald-400 mr-2"></i> Resumo de Status</h2>
+                            <div class="space-y-3" id="resumoStatusContainer">
+                                <!-- Preenchido via JS -->
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-cardBorder text-center">
+                            <p class="text-xs text-zinc-500">Oásis Car CRM • Conectado ao Supabase</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA 2: LEADS & ORÇAMENTOS (TABELA COMPLETA) -->
+            <div id="tab-leads" class="hidden space-y-6">
+                <!-- Filtros rápidos -->
+                <div class="flex flex-wrap items-center justify-between gap-4 glass-panel p-4 rounded-2xl">
+                    <div class="flex flex-wrap items-center gap-2" id="filtroStatusContainer">
+                        <button onclick="filtrarPorStatus('TODOS')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-brandAmber text-black filter-btn" data-status="TODOS">Todos</button>
+                        <button onclick="filtrarPorStatus('NOVO')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-zinc-900 text-zinc-400 hover:text-white filter-btn" data-status="NOVO">Novos</button>
+                        <button onclick="filtrarPorStatus('EM_ATENDIMENTO')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-zinc-900 text-zinc-400 hover:text-white filter-btn" data-status="EM_ATENDIMENTO">Em Atendimento</button>
+                        <button onclick="filtrarPorStatus('ORCAMENTO')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-zinc-900 text-zinc-400 hover:text-white filter-btn" data-status="ORCAMENTO">Orçamento</button>
+                        <button onclick="filtrarPorStatus('AGENDADO')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-zinc-900 text-zinc-400 hover:text-white filter-btn" data-status="AGENDADO">Agendados</button>
+                        <button onclick="filtrarPorStatus('GANHO')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-zinc-900 text-zinc-400 hover:text-white filter-btn" data-status="GANHO">Ganhos</button>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <select id="selectOrdenacao" onchange="mudarOrdenacao()" class="bg-zinc-900 border border-cardBorder text-xs rounded-xl px-3 py-2 text-zinc-300 focus:outline-none focus:border-brandAmber">
+                            <option value="recente">Mais recentes</option>
+                            <option value="antigo">Mais antigos</option>
+                            <option value="nome">Nome (A-Z)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-3xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-zinc-500 uppercase text-[11px] tracking-wider border-b border-cardBorder bg-zinc-900/40">
+                                    <th class="p-5">Data / Hora</th>
+                                    <th class="p-5">Cliente</th>
+                                    <th class="p-5">Veículo</th>
+                                    <th class="p-5">Serviço</th>
+                                    <th class="p-5">Status</th>
+                                    <th class="p-5">Valor</th>
+                                    <th class="p-5 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaLeadsCorpo" class="divide-y divide-cardBorder text-sm">
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA 3: FUNIL DE VENDAS KANBAN -->
+            <div id="tab-kanban" class="hidden h-full flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <p class="text-zinc-400 text-xs">Arraste ou altere o status dos leads diretamente no fluxo operacional.</p>
+                </div>
+                <div class="flex-1 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4 overflow-x-auto pb-4 custom-scrollbar" id="kanbanBoard">
+                    <!-- Colunas Kanban geradas via JS -->
+                </div>
+            </div>
+
+            <!-- ABA 4: AGENDA -->
+            <div id="tab-agenda" class="hidden space-y-6">
+                <div class="glass-panel p-6 rounded-2xl">
+                    <h2 class="text-lg font-bold mb-2 flex items-center"><i class="fa-solid fa-calendar-check text-brandAmber mr-2"></i> Agendamentos Confirmados</h2>
+                    <p class="text-zinc-400 text-xs mb-6">Serviços agendados para execução na Oásis Car.</p>
+                    <div id="listaAgenda" class="space-y-3">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA 5: CLIENTES GANHOS -->
+            <div id="tab-clientes" class="hidden space-y-6">
+                <div class="glass-panel p-6 rounded-2xl">
+                    <h2 class="text-lg font-bold mb-2 flex items-center"><i class="fa-solid fa-trophy text-emerald-400 mr-2"></i> Base de Clientes Convertidos</h2>
+                    <p class="text-zinc-400 text-xs mb-6">Histórico de orçamentos fechados com sucesso.</p>
+                    <div id="listaClientesGanhos" class="space-y-3">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA 6: PERDIDOS -->
+            <div id="tab-perdidos" class="hidden space-y-6">
+                <div class="glass-panel p-6 rounded-2xl">
+                    <h2 class="text-lg font-bold mb-2 flex items-center"><i class="fa-solid fa-ban text-red-400 mr-2"></i> Leads Não Convertidos</h2>
+                    <p class="text-zinc-400 text-xs mb-6">Análise de leads que não fecharam.</p>
+                    <div id="listaPerdidos" class="space-y-3">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 
+    <!-- MODAL DE DETALHES / EDIÇÃO -->
+    <div id="modalLead" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-2xl rounded-3xl p-8 border border-cardBorder max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-cardBorder">
+                <div>
+                    <h3 id="modalTitulo" class="text-xl font-bold">Detalhes do Lead</h3>
+                    <p class="text-zinc-400 text-xs">Visualize ou atualize as informações do cliente.</p>
+                </div>
+                <button onclick="fecharModal()" class="text-zinc-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="formEdicaoLead" onsubmit="salvarEdicaoLead(event)" class="space-y-4">
+                <input type="hidden" id="editId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 mb-1">Nome do Cliente</label>
+                        <input type="text" id="editNome" class="w-full bg-zinc-900 border border-cardBorder rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brandAmber" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 mb-1">Telefone / WhatsApp</label>
+                        <input type="text" id="editTelefone" class="w-full bg-zinc-900 border border-cardBorder rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brandAmber">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 mb-1">Veículo</label>
+                        <input type="text" id="editVeiculo" class="w-full bg-zinc-900 border border-cardBorder rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brandAmber">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 mb-1">Serviço Desejado</label>
+                        <input type="text" id="editServico" class="w-full bg-zinc-900 border border-cardBorder rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brandAmber">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 mb-1">Status Operacional</label>
+                        <select id="editStatus" class="w-full bg-zinc-900 border border-cardBorder rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brandAmber text-zinc-200">
+                            <option value="NOVO">NOVO</option>
+                            <option value="EM_ATENDIMENTO">EM_ATENDIMENTO</option>
+                            <option value="ORCAMENTO">ORCAMENTO</option>
+                            <option value="NEGOCIACAO">NEGOCIACAO</option>
+                            <option value="AGENDADO">AGENDADO</option>
+                            <option value="GANHO">GANHO</option>
+                            <option value="PERDIDO">PERDIDO</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 mb-1">Valor do Orçamento (R$)</label>
+                        <input type="number" step="0.01" id="editValor" class="w-full bg-zinc-900 border border-cardBorder rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brandAmber">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-400 mb-1">Observações Internas</label>
+                    <textarea id="editObservacoes" rows="3" class="w-full bg-zinc-900 border border-cardBorder rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brandAmber"></textarea>
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t border-cardBorder">
+                    <button type="button" onclick="excluirLeadAtual()" class="text-red-400 hover:text-red-300 text-xs font-bold flex items-center">
+                        <i class="fa-solid fa-trash mr-1.5"></i> Excluir Lead
+                    </button>
+                    <div class="flex space-x-3">
+                        <button type="button" onclick="fecharModal()" class="px-5 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-xs font-bold hover:bg-zinc-700 transition">Cancelar</button>
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-brandAmber text-black text-xs font-bold hover:bg-brandAmberHover transition shadow-lg shadow-amber-500/15">Salvar Alterações</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CONTAINER DE NOTIFICAÇÕES TOAST -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 space-y-3 pointer-events-none"></div>
+
+    <!-- SCRIPT DE LÓGICA DO SUPABASE & CRM -->
     <script>
+        // CONFIGURAÇÃO SUPABASE (Preservada e Segura)
         const SUPABASE_URL = 'https://pyodkkcmuoqrsnnifdqf.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_9jxs8Rc9L6BDNTvpT8fQ_A_dQSjuSHd';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const meuNumeroWhatsApp = '5516991408438';
+        const MEU_WHATSAPP = '5516991408438';
 
-        // FUNÇÃO PARA DELETAR O LEAD
-        async function deletarLead(id) {
-            if (!confirm('Tem certeza que deseja excluir este lead permanentemente?')) return;
+        let leadsGlobais = [];
+        let filtroAtivo = 'TODOS';
+        let termoBusca = '';
+        let ordenacaoAtual = 'recente';
+        let somHabilitado = true;
+
+        // ÁUDIO DE NOTIFICAÇÃO SUAVE
+        const audioNotificacao = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+
+        function toggleSound() {
+            somHabilitado = !somHabilitado;
+            const btn = document.getElementById('soundToggleBtn');
+            btn.innerHTML = somHabilitado ? '<i class="fa-solid fa-volume-high text-sm"></i>' : '<i class="fa-solid fa-volume-xmark text-sm text-red-400"></i>';
+            mostrarToast(somHabilitado ? 'Som de notificação ativado' : 'Som de notificação desativado', 'info');
+        }
+
+        // NAVEGAÇÃO ENTRE ABAS
+        function mudarAba(abaId) {
+            document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${abaId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-brandAmber', 'text-black', 'font-bold', 'shadow-lg', 'shadow-amber-500/10');
+                btn.classList.add('text-zinc-400', 'hover:text-white', 'hover:bg-zinc-900');
+            });
+
+            const btnAtivo = document.querySelector(`[data-tab="${abaId}"]`);
+            if (btnAtivo) {
+                btnAtivo.classList.remove('text-zinc-400', 'hover:text-white', 'hover:bg-zinc-900');
+                btnAtivo.classList.add('bg-brandAmber', 'text-black', 'font-bold', 'shadow-lg', 'shadow-amber-500/10');
+            }
+
+            const titulos = {
+                dashboard: 'Dashboard Executivo',
+                leads: 'Gestão de Leads & Orçamentos',
+                kanban: 'Funil de Vendas (Kanban)',
+                agenda: 'Agenda de Serviços',
+                clientes: 'Clientes Convertidos',
+                perdidos: 'Leads Perdidos'
+            };
+            document.getElementById('tituloPagina').innerText = titulos[abaId] || 'CRM Oásis Car';
+        }
+
+        // CARREGAR LEADS DO SUPABASE
+        async function carregarLeads() {
+            const syncIcon = document.getElementById('syncIcon');
+            syncIcon.classList.add('fa-spin');
+
+            const { data, error } = await supabaseClient
+                .from('pistas')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            syncIcon.classList.remove('fa-spin');
+
+            if (error) {
+                console.error('Erro ao buscar leads:', error);
+                mostrarToast('Erro ao carregar dados do Supabase.', 'erro');
+                return;
+            }
+
+            leadsGlobais = data || [];
+            atualizarInterfaceCompleta();
+            mostrarToast('Dados atualizados com sucesso!', 'sucesso');
+        }
+
+        // ATUALIZAR TODAS AS VIEWS
+        function atualizarInterfaceCompleta() {
+            atualizarContadoresMetricas();
+            renderizarTabelaLeads();
+            renderizarDashboardRecorrentes();
+            renderizarKanban();
+            renderizarAgenda();
+            renderizarClientesGanhos();
+            renderizarPerdidos();
             
+            document.getElementById('badgeContador').innerText = `${leadsGlobais.length} leads`;
+        }
+
+        // CÁLCULO DE MÉTRICAS E DASHBOARD
+        function atualizarContadoresMetricas() {
+            const total = leadsGlobais.length;
+            const hojeStr = new Date().toISOString().split('T')[0];
+            
+            const hoje = leadsGlobais.filter(l => l.created_at && l.created_at.startsWith(hojeStr)).length;
+            
+            const pipeline = leadsGlobais
+                .filter(l => l.status !== 'GANHO' && l.status !== 'PERDIDO')
+                .reduce((acc, l) => acc + (Number(l.valor) || 0),alah => alah, 0); // soma segura
+
+            const ganhos = leadsGlobais.filter(l => l.status === 'GANHO').length;
+            const conversao = total > 0 ? ((ganhos / total) * 100).toFixed(1) : 0;
+
+            document.getElementById('m-total').innerText = total;
+            document.getElementById('m-hoje').innerText = hoje;
+            document.getElementById('m-pipeline').innerText = pipeline.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('m-conversao').innerText = `${conversao}%`;
+
+            // Resumo de Status na Dashboard
+            const statusCounts = {};
+            leadsGlobais.forEach(l => {
+                const st = l.status || 'NOVO';
+                statusCounts[st] = (statusCounts[st] || 0) + 1;
+            });
+
+            const resumoContainer = document.getElementById('resumoStatusContainer');
+            resumoContainer.innerHTML = '';
+            
+            const coresStatus = {
+                NOVO: 'bg-blue-500', EM_ATENDIMENTO: 'bg-amber-500', ORCAMENTO: 'bg-purple-500',
+                NEGOCIACAO: 'bg-orange-500', AGENDADO: 'bg-indigo-500', GANHO: 'bg-emerald-500', PERDIDO: 'bg-red-500'
+            };
+
+            for (const [st, qtd] of Object.entries(statusCounts)) {
+                resumoContainer.innerHTML += `
+                    <div class="flex items-center justify-between text-xs py-1.5 border-b border-cardBorder/50">
+                        <span class="flex items-center text-zinc-300"><span class="w-2 h-2 rounded-full ${coresStatus[st] || 'bg-zinc-500'} mr-2"></span> ${st}</span>
+                        <span class="font-bold bg-zinc-900 px-2.5 py-0.5 rounded-md">${qtd}</span>
+                    </div>
+                `;
+            }
+        }
+
+        // RENDERIZAR TABELA COMPLETA DE LEADS
+        function renderizarTabelaLeads() {
+            const corpo = document.getElementById('tabelaLeadsCorpo');
+            corpo.innerHTML = '';
+
+            let filtrados = leadsGlobais.filter(l => {
+                const matchStatus = filtroAtivo === 'TODOS' || l.status === filtroAtivo;
+                const termo = termoBusca.toLowerCase();
+                const matchBusca = !termo || 
+                    (l.nome && l.nome.toLowerCase().includes(termo)) ||
+                    (l.veiculo && l.veiculo.toLowerCase().includes(termo)) ||
+                    (l.servico && l.servico.toLowerCase().includes(termo));
+                return matchStatus && matchBusca;
+            });
+
+            // Ordenação
+            filtrados.sort((a, b) => {
+                if (ordenacaoAtual === 'recente') return new Date(b.created_at) - new Date(a.created_at);
+                if (ordenacaoAtual === 'antigo') return new Date(a.created_at) - new Date(b.created_at);
+                if (ordenacaoAtual === 'nome') return (a.nome || '').localeCompare(b.nome || '');
+                return 0;
+            });
+
+            if (filtrados.length === 0) {
+                corpo.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-zinc-500">Nenhum lead encontrado com estes filtros.</td></tr>`;
+                return;
+            }
+
+            filtrados.forEach(item => {
+                const dataFormatada = item.created_at ? new Date(item.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
+                const fone = item.telefone || item.whatsapp || MEU_WHATSAPP;
+                const msgZap = encodeURIComponent(`Olá ${item.nome}, tudo bem? Aqui é da Oásis Car. Recebemos seu interesse em ${item.servico || 'estética automotiva'} para seu ${item.veiculo || 'veículo'}. Como podemos ajudar?`);
+                const linkZap = `https://wa.me/${fone.replace(/\D/g, '')}?text=${msgZap}`;
+
+                const badgeStatus = {
+                    NOVO: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+                    EM_ATENDIMENTO: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+                    ORCAMENTO: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+                    NEGOCIACAO: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+                    AGENDADO: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+                    GANHO: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                    PERDIDO: 'bg-red-500/10 text-red-400 border-red-500/20'
+                }[item.status || 'NOVO'] || 'bg-zinc-800 text-zinc-300';
+
+                corpo.innerHTML += `
+                    <tr class="hover:bg-zinc-900/40 transition">
+                        <td class="p-5 text-zinc-400 text-xs">${dataFormatada}</td>
+                        <td class="p-5 font-bold">${item.nome || 'Cliente sem nome'}</td>
+                        <td class="p-5 text-zinc-300">${item.veiculo || 'Não informado'}</td>
+                        <td class="p-5 text-zinc-300">${item.servico || 'Geral'}</td>
+                        <td class="p-5"><span class="px-3 py-1 rounded-full text-xs font-semibold border ${badgeStatus}">${item.status || 'NOVO'}</span></td>
+                        <td class="p-5 text-zinc-300 font-semibold">${item.valor ? Number(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'}</td>
+                        <td class="p-5 text-right space-x-2">
+                            <a href="${linkZap}" target="_blank" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-black transition" title="Chamar no WhatsApp">
+                                <i class="fa-brands fa-whatsapp text-sm"></i>
+                            </a>
+                            <button onclick="abrirModal(${item.id})" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-brandAmber hover:text-black transition" title="Editar / Detalhes">
+                                <i class="fa-solid fa-pen text-xs"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // RENDERIZAR DASHBOARD RECENTES
+        function renderizarDashboardRecorrentes() {
+            const container = document.getElementById('tabelaDashboardRecorrentes');
+            container.innerHTML = '';
+            const ultimos = leadsGlobais.slice(0, 5);
+
+            if (ultimos.length === 0) {
+                container.innerHTML = '<p class="text-xs text-zinc-500 text-center py-6">Nenhum lead recente.</p>';
+                return;
+            }
+
+            ultimos.forEach(item => {
+                const fone = item.telefone || item.whatsapp || MEU_WHATSAPP;
+                const linkZap = `https://wa.me/${fone.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá ${item.nome}, tudo bem? Aqui é da Oásis Car.`)}`;
+                container.innerHTML += `
+                    <div class="flex items-center justify-between p-3.5 rounded-xl bg-zinc-900/60 border border-cardBorder hover:border-zinc-700 transition">
+                        <div>
+                            <p class="font-bold text-sm">${item.nome || 'Cliente'}</p>
+                            <p class="text-xs text-zinc-400">${item.veiculo || 'Veículo'} • <span class="text-brandAmber">${item.servico || 'Serviço'}</span></p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <a href="${linkZap}" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-bold hover:bg-emerald-500 hover:text-black transition">
+                                <i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp
+                            </a>
+                            <button onclick="abrirModal(${item.id})" class="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-300 text-xs font-bold hover:bg-zinc-700 transition">Detalhes</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // RENDERIZAR KANBAN (FUNIL DE VENDAS)
+        function renderizarKanban() {
+            const board = document.getElementById('kanbanBoard');
+            board.innerHTML = '';
+
+            const colunas = [
+                { id: 'NOVO', titulo: 'Novos Leads', cor: 'border-l-blue-500' },
+                { id: 'EM_ATENDIMENTO', titulo: 'Em Atendimento', cor: 'border-l-amber-500' },
+                { id: 'ORCAMENTO', titulo: 'Orçamento', cor: 'border-l-purple-500' },
+                { id: 'NEGOCIACAO', titulo: 'Negociação', cor: 'border-l-orange-500' },
+                { id: 'AGENDADO', titulo: 'Agendados', cor: 'border-l-indigo-500' },
+                { id: 'GANHO', titulo: 'Ganhos', cor: 'border-l-emerald-500' },
+                { id: 'PERDIDO', titulo: 'Perdidos', cor: 'border-l-red-500' }
+            ];
+
+            colunas.forEach(col => {
+                const leadsColuna = leadsGlobais.filter(l => (l.status || 'NOVO') === col.id);
+                
+                let cardsHtml = '';
+                leadsColuna.forEach(item => {
+                    const fone = item.telefone || item.whatsapp || MEU_WHATSAPP;
+                    const linkZap = `https://wa.me/${fone.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá ${item.nome}, tudo bem? Aqui é da Oásis Car.`)}`;
+                    
+                    cardsHtml += `
+                        <div class="bg-zinc-900/90 border border-cardBorder p-4 rounded-2xl hover:border-zinc-700 transition shadow-md space-y-3">
+                            <div class="flex justify-between items-start">
+                                <p class="font-bold text-sm text-white">${item.nome || 'Cliente'}</p>
+                                <button onclick="abrirModal(${item.id})" class="text-zinc-500 hover:text-brandAmber"><i class="fa-solid fa-pen text-xs"></i></button>
+                            </div>
+                            <p class="text-xs text-zinc-400">${item.veiculo || 'Veículo'} • <span class="text-brandAmber">${item.servico || 'Serviço'}</span></p>
+                            <p class="text-xs font-semibold text-emerald-400">${item.valor ? Number(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'}</p>
+                            <div class="flex items-center justify-between pt-2 border-t border-zinc-800 text-xs">
+                                <a href="${linkZap}" target="_blank" class="text-emerald-400 hover:underline font-bold flex items-center"><i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp</a>
+                                <select onchange="atualizarStatusLead(${item.id}, this.value)" class="bg-zinc-950 border border-cardBorder text-[10px] text-zinc-300 rounded px-1.5 py-1 focus:outline-none">
+                                    <option value="NOVO" ${item.status === 'NOVO' ? 'selected' : ''}>Novo</option>
+                                    <option value="EM_ATENDIMENTO" ${item.status === 'EM_ATENDIMENTO' ? 'selected' : ''}>Atendimento</option>
+                                    <option value="ORCAMENTO" ${item.status === 'ORCAMENTO' ? 'selected' : ''}>Orçamento</option>
+                                    <option value="NEGOCIACAO" ${item.status === 'NEGOCIACAO' ? 'selected' : ''}>Negociação</option>
+                                    <option value="AGENDADO" ${item.status === 'AGENDADO' ? 'selected' : ''}>Agendado</option>
+                                    <option value="GANHO" ${item.status === 'GANHO' ? 'selected' : ''}>Ganho</option>
+                                    <option value="PERDIDO" ${item.status === 'PERDIDO' ? 'selected' : ''}>Perdido</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                board.innerHTML += `
+                    <div class="w-72 flex-shrink-0 glass-panel rounded-3xl p-4 flex flex-col max-h-full">
+                        <div class="flex justify-between items-center mb-3 pb-2 border-b border-cardBorder">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-300 flex items-center"><span class="w-2 h-2 rounded-full bg-brandAmber mr-2"></span> ${col.titulo}</h3>
+                            <span class="bg-zinc-900 text-zinc-400 text-xs px-2 py-0.5 rounded-full font-bold">${leadsColuna.length}</span>
+                        </div>
+                        <div class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1">
+                            ${cardsHtml || '<p class="text-center text-xs text-zinc-600 py-8">Nenhum lead</p>'}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // RENDERIZAR AGENDA
+        function renderizarAgenda() {
+            const container = document.getElementById('listaAgenda');
+            container.innerHTML = '';
+            const agendados = leadsGlobais.filter(l => l.status === 'AGENDADO');
+
+            if (agendados.length === 0) {
+                container.innerHTML = '<p class="text-xs text-zinc-500 text-center py-8">Nenhum serviço agendado no momento.</p>';
+                return;
+            }
+
+            agendados.forEach(item => {
+                container.innerHTML += `
+                    <div class="flex items-center justify-between p-4 rounded-2xl bg-zinc-900/60 border border-cardBorder">
+                        <div>
+                            <p class="font-bold text-sm">${item.nome}</p>
+                            <p class="text-xs text-zinc-400">${item.veiculo} • <span class="text-brandAmber">${item.servico}</span></p>
+                            <p class="text-xs text-indigo-400 mt-1 font-semibold"><i class="fa-solid fa-calendar mr-1"></i> Agendado para execução</p>
+                        </div>
+                        <button onclick="abrirModal(${item.id})" class="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 text-xs font-bold hover:bg-brandAmber hover:text-black transition">Gerenciar</button>
+                    </div>
+                `;
+            });
+        }
+
+        // RENDERIZAR CLIENTES GANHOS
+        function renderizarClientesGanhos() {
+            const container = document.getElementById('listaClientesGanhos');
+            container.innerHTML = '';
+            const ganhos = leadsGlobais.filter(l => l.status === 'GANHO');
+
+            if (ganhos.length === 0) {
+                container.innerHTML = '<p class="text-xs text-zinc-500 text-center py-8">Nenhum cliente convertido ainda.</p>';
+                return;
+            }
+
+            ganhos.forEach(item => {
+                container.innerHTML += `
+                    <div class="flex items-center justify-between p-4 rounded-2xl bg-zinc-900/60 border border-cardBorder">
+                        <div>
+                            <p class="font-bold text-sm text-emerald-400">${item.nome} <i class="fa-solid fa-check-circle ml-1"></i></p>
+                            <p class="text-xs text-zinc-400">${item.veiculo} • <span class="text-white">${item.servico}</span></p>
+                            <p class="text-xs text-zinc-500 mt-1">Valor fechado: <span class="text-emerald-400 font-bold">${item.valor ? Number(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'}</span></p>
+                        </div>
+                        <button onclick="abrirModal(${item.id})" class="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 text-xs font-bold hover:bg-brandAmber hover:text-black transition">Visualizar</button>
+                    </div>
+                `;
+            });
+        }
+
+        // RENDERIZAR PERDIDOS
+        function renderizarPerdidos() {
+            const container = document.getElementById('listaPerdidos');
+            container.innerHTML = '';
+            const perdidos = leadsGlobais.filter(l => l.status === 'PERDIDO');
+
+            if (perdidos.length === 0) {
+                container.innerHTML = '<p class="text-xs text-zinc-500 text-center py-8">Nenhum lead perdido.</p>';
+                return;
+            }
+
+            perdidos.forEach(item => {
+                container.innerHTML += `
+                    <div class="flex items-center justify-between p-4 rounded-2xl bg-zinc-900/60 border border-cardBorder">
+                        <div>
+                            <p class="font-bold text-sm text-red-400">${item.nome}</p>
+                            <p class="text-xs text-zinc-400">${item.veiculo} • ${item.servico}</p>
+                        </div>
+                        <button onclick="abrirModal(${item.id})" class="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 text-xs font-bold hover:bg-brandAmber hover:text-black transition">Detalhes</button>
+                    </div>
+                `;
+            });
+        }
+
+        // ALTERAR STATUS RÁPIDO (KANBAN)
+        async function atualizarStatusLead(id, novoStatus) {
+            const { error } = await supabaseClient
+                .from('pistas')
+                .update({ status: novoStatus })
+                .eq('id', id);
+
+            if (error) {
+                mostrarToast('Erro ao atualizar status.', 'erro');
+            } else {
+                mostrarToast('Status atualizado com sucesso!', 'sucesso');
+                carregarLeads();
+            }
+        }
+
+        // FILTROS E BUSCA
+        function filtrarPorStatus(status) {
+            filtroAtivo = status;
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('bg-brandAmber', 'text-black', 'font-bold');
+                b.classList.add('bg-zinc-900', 'text-zinc-400');
+            });
+            event.target.classList.remove('bg-zinc-900', 'text-zinc-400');
+            event.target.classList.add('bg-brandAmber', 'text-black', 'font-bold');
+            renderizarTabelaLeads();
+        }
+
+        function filtrarLeads() {
+            termoBusca = document.getElementById('inputBusca').value;
+            renderizarTabelaLeads();
+        }
+
+        function mudarOrdenacao() {
+            ordenacaoAtual = document.getElementById('selectOrdenacao').value;
+            renderizarTabelaLeads();
+        }
+
+        // MODAL DE EDIÇÃO
+        function abrirModal(id) {
+            const lead = leadsGlobais.find(l => l.id === id);
+            if (!lead) return;
+
+            document.getElementById('editId').value = lead.id;
+            document.getElementById('editNome').value = lead.nome || '';
+            document.getElementById('editTelefone').value = lead.telefone || lead.whatsapp || '';
+            document.getElementById('editVeiculo').value = lead.veiculo || '';
+            document.getElementById('editServico').value = lead.servico || '';
+            document.getElementById('editStatus').value = lead.status || 'NOVO';
+            document.getElementById('editValor').value = lead.valor || '';
+            document.getElementById('editObservacoes').value = lead.observacoes || '';
+
+            document.getElementById('modalLead').classList.remove('hidden');
+        }
+
+        function fecharModal() {
+            document.getElementById('modalLead').classList.add('hidden');
+        }
+
+        async function salvarEdicaoLead(e) {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const dadosAtualizados = {
+                nome: document.getElementById('editNome').value,
+                telefone: document.getElementById('editTelefone').value,
+                veiculo: document.getElementById('editVeiculo').value,
+                servico: document.getElementById('editServico').value,
+                status: document.getElementById('editStatus').value,
+                valor: document.getElementById('editValor').value ? Number(document.getElementById('editValor').value) : null,
+                observacoes: document.getElementById('editObservacoes').value
+            };
+
+            const { error } = await supabaseClient
+                .from('pistas')
+                .update(dadosAtualizados)
+                .eq('id', id);
+
+            if (error) {
+                mostrarToast('Erro ao salvar alterações.', 'erro');
+            } else {
+                mostrarToast('Lead atualizado com sucesso!', 'sucesso');
+                fecharModal();
+                carregarLeads();
+            }
+        }
+
+        async function excluirLeadAtual() {
+            const id = document.getElementById('editId').value;
+            if (!confirm('Tem certeza que deseja excluir permanentemente este lead?')) return;
+
             const { error } = await supabaseClient
                 .from('pistas')
                 .delete()
                 .eq('id', id);
 
             if (error) {
-                alert('Erro ao excluir: ' + error.message);
+                mostrarToast('Erro ao excluir lead.', 'erro');
             } else {
+                mostrarToast('Lead excluído com sucesso.', 'sucesso');
+                fecharModal();
                 carregarLeads();
             }
         }
 
-        async function carregarLeads() {
-            const tbody = document.getElementById('tabelaLeads');
-            tbody.innerHTML = '<tr><td colspan="6" class="py-10 text-center text-neutral-500">Carregando CRM...</td></tr>';
-
-            // BUSCANDO DA TABELA 'pistas' USANDO 'created_at'
-            const { data, error } = await supabaseClient
-                .from('pistas')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-10 text-center text-red-500">Erro: ${error.message}</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = '';
+        // SISTEMA DE TOAST NOTIFICATIONS
+        function mostrarToast(mensagem, tipo = 'sucesso') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
             
-            data.forEach(item => {
-                const tr = document.createElement('tr');
-                
-                let dataFormatada = '-';
-                if (item.created_at) {
-                    const dataObj = new Date(item.created_at);
-                    dataFormatada = dataObj.toLocaleString('pt-BR', {
-                        day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
-                    });
-                }
+            const cores = {
+                sucesso: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
+                erro: 'bg-red-500/10 border-red-500/30 text-red-400',
+                info: 'bg-amber-500/10 border-amber-500/30 text-brandAmber'
+            }[tipo] || 'bg-zinc-900 border-zinc-700 text-white';
 
-                const linkZap = `https://wa.me/${meuNumeroWhatsApp}?text=${encodeURIComponent(`Olá ${item.nome}, vi seu interesse no serviço de ${item.servico}...`)}`;
-                
-                tr.innerHTML = `
-                    <td class="py-5 text-neutral-400 text-sm">${dataFormatada}</td>
-                    <td class="py-5 font-medium">${item.nome}</td>
-                    <td class="py-5 text-neutral-400">${item.veiculo}</td>
-                    <td class="py-5 text-neutral-400">${item.servico}</td>
-                    <td class="py-5"><span class="bg-neutral-800 px-3 py-1 rounded-full text-xs">${item.status || 'NOVO'}</span></td>
-                    <td class="py-5 text-right space-x-4">
-                        <a href="${linkZap}" target="_blank" class="text-amber-500 hover:text-amber-300 font-bold" title="Chamar no WhatsApp">
-                            <i class="fa-brands fa-whatsapp text-lg"></i>
-                        </a>
-                        <button onclick="deletarLead(${item.id})" class="text-neutral-500 hover:text-red-500 font-bold transition-all" title="Excluir Lead">
-                            <i class="fa-solid fa-trash text-lg"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+            toast.className = `glass-panel px-5 py-3 rounded-2xl border text-xs font-bold shadow-xl toast-animate flex items-center space-x-3 pointer-events-auto ${cores}`;
+            toast.innerHTML = `<i class="fa-solid fa-bell text-sm"></i> <span>${mensagem}</span>`;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
         }
 
-        window.onload = carregarLeads;
+        // SUPABASE REALTIME (NOVO LEAD EM TEMPO REAL)
+        function configurarRealtime() {
+            supabaseClient
+                .channel('public:pistas')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pistas' }, payload => {
+                    const novo = payload.new;
+                    leadsGlobais.unshift(novo);
+                    atualizarInterfaceCompleta();
+                    
+                    if (somHabilitado) {
+                        audioNotificacao.play().catch(e => console.log('Áudio bloqueado pelo navegador até interação.'));
+                    }
+
+                    mostrarToast(`🔔 Novo lead recebido: ${novo.nome || 'Cliente'} (${novo.veiculo || 'Veículo'})`, 'info');
+                })
+                .subscribe();
+        }
+
+        // INICIALIZAÇÃO AO CARREGAR A PÁGINA
+        window.onload = () => {
+            carregarLeads();
+            configurarRealtime();
+        };
     </script>
 </body>
 </html>
