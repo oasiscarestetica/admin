@@ -370,24 +370,76 @@
             document.getElementById('tituloPagina').innerText = titulos[abaId] || 'CRM Oásis Car';
         }
 
-        // CARREGAR LEADS DO SUPABASE
+      // CARREGAR LEADS DO SUPABASE
         async function carregarLeads() {
             const syncIcon = document.getElementById('syncIcon');
-            syncIcon.classList.add('fa-spin');
+            if (syncIcon) syncIcon.classList.add('fa-spin');
 
-            
             const { data, error } = await supabaseClient
                 .from('pistas')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            syncIcon.classList.remove('fa-spin');
+            if (syncIcon) syncIcon.classList.remove('fa-spin');
 
             if (error) {
                 console.error('Erro ao buscar leads:', error);
                 mostrarToast('Erro ao carregar dados do Supabase.', 'erro');
                 return;
             }
+
+            // Salva os dados na memória do sistema
+            leadsGlobais = data;
+
+            // =========================================================
+            // 1. FATURAMENTO TOTAL (SOMA TUDO)
+            // =========================================================
+            const faturamentoTotal = data.reduce((soma, lead) => soma + (Number(lead.valor) || 0), 0);
+            const valorFormatado = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(faturamentoTotal);
+
+            const elementoPipeline = document.getElementById('pipelinePotencial');
+            if (elementoPipeline) {
+                elementoPipeline.innerText = valorFormatado;
+                
+                // Altera o subtítulo para fazer sentido com a soma total
+                const subtitulo = elementoPipeline.nextElementSibling;
+                if (subtitulo) subtitulo.innerText = 'Faturamento total em caixa e agendado';
+            }
+
+            // =========================================================
+            // 2. LISTA DE ÚLTIMOS LEADS CAPTURADOS
+            // =========================================================
+            const listaLeads = document.getElementById('listaUltimosLeads'); 
+            if (listaLeads) {
+                listaLeads.innerHTML = ''; // Limpa a área antes de preencher
+                const ultimos5 = data.slice(0, 5); // Pega apenas os 5 mais recentes
+
+                ultimos5.forEach(lead => {
+                    // Define as cores baseadas no status premium da estética
+                    let corStatus = lead.status === 'GANHO' ? 'text-green-400 border-green-500' :
+                                    lead.status === 'AGENDADO' ? 'text-purple-400 border-purple-500' :
+                                    'text-amber-400 border-amber-500';
+
+                    listaLeads.innerHTML += `
+                        <div class="flex justify-between items-center py-3 border-b border-gray-800 last:border-0">
+                            <div>
+                                <p class="text-white font-semibold text-sm">${lead.nome || 'Cliente não identificado'}</p>
+                                <p class="text-gray-400 text-xs mt-1">${lead.veiculo || 'Veículo a definir'} • ${lead.servico || 'Sem serviço'}</p>
+                            </div>
+                            <div>
+                                <span class="text-[10px] uppercase font-bold px-3 py-1 rounded-full border bg-black ${corStatus}">
+                                    ${lead.status || 'NOVO'}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Garante que as outras telas também sejam atualizadas
+            if (typeof renderizarTabela === 'function') renderizarTabela();
+            if (typeof renderizarKanban === 'function') renderizarKanban();
+        }
 
             leadsGlobais = data || [];
             atualizarInterfaceCompleta();
