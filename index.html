@@ -375,6 +375,7 @@
             const syncIcon = document.getElementById('syncIcon');
             syncIcon.classList.add('fa-spin');
 
+            
             const { data, error } = await supabaseClient
                 .from('pistas')
                 .select('*')
@@ -721,7 +722,7 @@ document.getElementById('editDataAgendamento').value = lead.data_agendamento ? l
         }
 
         // MODAL DE EDIÇÃO
-        function abrirModal(id) {
+      function abrirModal(id) {
             const lead = leadsGlobais.find(l => l.id === id);
             if (!lead) return;
 
@@ -733,8 +734,10 @@ document.getElementById('editDataAgendamento').value = lead.data_agendamento ? l
             document.getElementById('editStatus').value = lead.status || 'NOVO';
             document.getElementById('editValor').value = lead.valor || '';
             document.getElementById('editObservacoes').value = lead.observacoes || '';
+            document.getElementById('editDataAgendamento').value = lead.data_agendamento ? lead.data_agendamento.slice(0, 16) : '';
 
             document.getElementById('modalLead').classList.remove('hidden');
+        }
         }
 
         function fecharModal() {
@@ -743,7 +746,7 @@ document.getElementById('editDataAgendamento').value = lead.data_agendamento ? l
 
         async function salvarEdicaoLead(e) {
             e.preventDefault();
-            const id = document.getElementById('editId').value;
+       const id = document.getElementById('editId').value;
             const dadosAtualizados = {
                 nome: document.getElementById('editNome').value,
                 telefone: document.getElementById('editTelefone').value,
@@ -751,7 +754,9 @@ document.getElementById('editDataAgendamento').value = lead.data_agendamento ? l
                 servico: document.getElementById('editServico').value,
                 status: document.getElementById('editStatus').value,
                 valor: document.getElementById('editValor').value ? Number(document.getElementById('editValor').value) : null,
-                observacoes: document.getElementById('editObservacoes').value
+                observacoes: document.getElementById('editObservacoes').value,
+                data_agendamento: document.getElementById('editDataAgendamento').value || null
+        
             };
 
             const { error } = await supabaseClient
