@@ -370,39 +370,24 @@
             document.getElementById('tituloPagina').innerText = titulos[abaId] || 'CRM Oásis Car';
         }
 
-  // =========================================================
-    // LISTA DE ÚLTIMOS LEADS CAPTURADOS
-    // =========================================================
-    const listaLeads = document.getElementById('listaUltimosLeads'); 
-    if (listaLeads) {
-        listaLeads.innerHTML = ''; 
-        const ultimos5 = data.slice(0, 5); 
+        // CARREGAR LEADS DO SUPABASE
+        async function carregarLeads() {
+            const syncIcon = document.getElementById('syncIcon');
+            syncIcon.classList.add('fa-spin');
 
-        ultimos5.forEach(lead => {
-            let corStatus = lead.status === 'GANHO' ? 'text-green-400 border-green-500' :
-                            lead.status === 'AGENDADO' ? 'text-purple-400 border-purple-500' :
-                            'text-amber-400 border-amber-500';
+            
+            const { data, error } = await supabaseClient
+                .from('pistas')
+                .select('*')
+                .order('created_at', { ascending: false });
 
-            listaLeads.innerHTML += `
-                <div class="flex justify-between items-center py-3 border-b border-gray-800 last:border-0">
-                    <div>
-                        <p class="text-white font-semibold text-sm">${lead.nome || 'Cliente não identificado'}</p>
-                        <p class="text-gray-400 text-xs mt-1">${lead.veiculo || 'Veículo a definir'} • ${lead.servico || 'Sem serviço'}</p>
-                    </div>
-                    <div>
-                        <span class="text-[10px] uppercase font-bold px-3 py-1 rounded-full border bg-black ${corStatus}">
-                            ${lead.status || 'NOVO'}
-                        </span>
-                    </div>
-                </div>
-            `;
-        });
-    }
+            syncIcon.classList.remove('fa-spin');
 
-            // Garante que as outras telas também sejam atualizadas
-            if (typeof renderizarTabela === 'function') renderizarTabela();
-            if (typeof renderizarKanban === 'function') renderizarKanban();
-        }
+            if (error) {
+                console.error('Erro ao buscar leads:', error);
+                mostrarToast('Erro ao carregar dados do Supabase.', 'erro');
+                return;
+            }
 
             leadsGlobais = data || [];
             atualizarInterfaceCompleta();
@@ -532,7 +517,7 @@ const pipeline = leadsGlobais
             });
         }
 
-       // RENDERIZAR DASHBOARD RECENTES
+        // RENDERIZAR DASHBOARD RECENTES
         function renderizarDashboardRecorrentes() {
             const container = document.getElementById('tabelaDashboardRecorrentes');
             container.innerHTML = '';
@@ -542,28 +527,6 @@ const pipeline = leadsGlobais
                 container.innerHTML = '<p class="text-xs text-zinc-500 text-center py-6">Nenhum lead recente.</p>';
                 return;
             }
-
-            ultimos.forEach(item => {
-                const fone = item.telefone || item.whatsapp || '';
-                const numeroZap = fone.replace(/\D/g, ''); // CORREÇÃO: Declarado aqui
-                const linkZap = numeroZap ? `https://wa.me/${numeroZap}?text=${encodeURIComponent(`Olá ${item.nome}, tudo bem? Aqui é da Oásis Car.`)}` : '#';
-                
-                container.innerHTML += `
-                    <div class="flex items-center justify-between p-3.5 rounded-xl bg-zinc-900/60 border border-cardBorder hover:border-zinc-700 transition">
-                        <div>
-                            <p class="font-bold text-sm">${item.nome || 'Cliente'}</p>
-                            <p class="text-xs text-zinc-400">${item.veiculo || 'Veículo'} • <span class="text-brandAmber">${item.servico || 'Serviço'}</span></p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <a href="${linkZap}" ${numeroZap ? 'target="_blank"' : 'onclick="return false;"'} class="px-3 py-1.5 rounded-lg ${numeroZap ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-black' : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'} text-xs font-bold transition">
-                                <i class="fa-brands fa-whatsapp mr-1"></i> ${numeroZap ? 'WhatsApp' : 'Sem telefone'}
-                            </a>
-                            <button onclick="abrirModal(${item.id})" class="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-300 text-xs font-bold hover:bg-zinc-700 transition">Detalhes</button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
 
             ultimos.forEach(item => {
                 const fone = item.telefone || item.whatsapp || '';
@@ -585,7 +548,7 @@ const pipeline = leadsGlobais
             });
         }
 
-       // RENDERIZAR KANBAN (FUNIL DE VENDAS)
+        // RENDERIZAR KANBAN (FUNIL DE VENDAS)
         function renderizarKanban() {
             const board = document.getElementById('kanbanBoard');
             board.innerHTML = '';
@@ -599,53 +562,6 @@ const pipeline = leadsGlobais
                 { id: 'GANHO', titulo: 'Ganhos', cor: 'border-l-emerald-500' },
                 { id: 'PERDIDO', titulo: 'Perdidos', cor: 'border-l-red-500' }
             ];
-
-            colunas.forEach(col => {
-                const leadsColuna = leadsGlobais.filter(l => (l.status || 'NOVO') === col.id);
-                
-                let cardsHtml = '';
-                leadsColuna.forEach(item => {
-                    const fone = item.telefone || item.whatsapp || '';
-                    const numeroZap = fone.replace(/\D/g, ''); // CORREÇÃO: Declarado aqui
-                    const linkZap = numeroZap ? `https://wa.me/${numeroZap}?text=${encodeURIComponent(`Olá ${item.nome}, tudo bem? Aqui é da Oásis Car.`)}` : '#';
-                    
-                    cardsHtml += `
-                        <div class="bg-zinc-900/90 border border-cardBorder p-4 rounded-2xl hover:border-zinc-700 transition shadow-md space-y-3">
-                            <div class="flex justify-between items-start">
-                                <p class="font-bold text-sm text-white">${item.nome || 'Cliente'}</p>
-                                <button onclick="abrirModal(${item.id})" class="text-zinc-500 hover:text-brandAmber"><i class="fa-solid fa-pen text-xs"></i></button>
-                            </div>
-                            <p class="text-xs text-zinc-400">${item.veiculo || 'Veículo'} • <span class="text-brandAmber">${item.servico || 'Serviço'}</span></p>
-                            <p class="text-xs font-semibold text-emerald-400">${item.valor ? Number(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'}</p>
-                            <div class="flex items-center justify-between pt-2 border-t border-zinc-800 text-xs">
-                                <a href="${linkZap}" ${numeroZap ? 'target="_blank"' : 'onclick="return false;"'} class="${numeroZap ? 'text-emerald-400 hover:underline' : 'text-zinc-600 cursor-not-allowed'} font-bold flex items-center"><i class="fa-brands fa-whatsapp mr-1"></i> ${numeroZap ? 'WhatsApp' : 'Sem telefone'}</a>
-                                <select onchange="atualizarStatusLead(${item.id}, this.value)" class="bg-zinc-950 border border-cardBorder text-[10px] text-zinc-300 rounded px-1.5 py-1 focus:outline-none">
-                                    <option value="NOVO" ${item.status === 'NOVO' ? 'selected' : ''}>Novo</option>
-                                    <option value="EM_ATENDIMENTO" ${item.status === 'EM_ATENDIMENTO' ? 'selected' : ''}>Atendimento</option>
-                                    <option value="ORCAMENTO" ${item.status === 'ORCAMENTO' ? 'selected' : ''}>Orçamento</option>
-                                    <option value="NEGOCIACAO" ${item.status === 'NEGOCIACAO' ? 'selected' : ''}>Negociação</option>
-                                    <option value="AGENDADO" ${item.status === 'AGENDADO' ? 'selected' : ''}>Agendado</option>
-                                    <option value="GANHO" ${item.status === 'GANHO' ? 'selected' : ''}>Ganho</option>
-                                    <option value="PERDIDO" ${item.status === 'PERDIDO' ? 'selected' : ''}>Perdido</option>
-                                </select>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                board.innerHTML += `
-                    <div class="w-72 flex-shrink-0 glass-panel rounded-3xl p-4 flex flex-col max-h-full">
-                        <div class="flex justify-between items-center mb-3 pb-2 border-b border-cardBorder">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-300 flex items-center"><span class="w-2 h-2 rounded-full bg-brandAmber mr-2"></span> ${col.titulo}</h3>
-                            <span class="bg-zinc-900 text-zinc-400 text-xs px-2 py-0.5 rounded-full font-bold">${leadsColuna.length}</span>
-                        </div>
-                        <div class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1">
-                            ${cardsHtml || '<p class="text-center text-xs text-zinc-600 py-8">Nenhum lead</p>'}
-                        </div>
-                    </div>
-                `;
-            });
-        }
 
             colunas.forEach(col => {
                 const leadsColuna = leadsGlobais.filter(l => (l.status || 'NOVO') === col.id);
